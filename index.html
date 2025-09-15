@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-Day Brahmacharya Daily Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .week-progress {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.3);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            background: #10ac84;
+            height: 100%;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .days-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .day-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .day-card.completed {
+            border-color: #10ac84;
+            background: linear-gradient(135deg, #f8fff9, #e8f8f5);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+
+        .day-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c2c54;
+        }
+
+        .day-progress {
+            font-size: 0.9rem;
+            color: #5f27cd;
+            font-weight: 600;
+        }
+
+        .schedule-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #341f97;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .morning { background: #ffa502; }
+        .work { background: #3742fa; }
+        .evening { background: #ff6348; }
+
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f2f6;
+            transition: background 0.2s ease;
+        }
+
+        .schedule-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            padding-left: 10px;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            accent-color: #10ac84;
+            transform: scale(1.2);
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: #5f27cd;
+            min-width: 130px;
+        }
+
+        .schedule-activity {
+            flex: 1;
+            color: #2c2c54;
+        }
+
+        .special-activity {
+            color: #ee5a24;
+            font-weight: 600;
+        }
+
+        .daily-reflection {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .reflection-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 8px;
+            color: #2c2c54;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .reflection-input:focus {
+            outline: none;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .stats-bar {
+            background: #2c2c54;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #10ac84;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+            margin: 20px;
+        }
+
+        .reset-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .days-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕉️ Brahmacharya Daily Planner</h1>
+            <p>7-Day Spiritual Discipline Tracker</p>
+            
+            <div class="week-progress">
+                <div>Weekly Progress: <span id="weekProgress">0%</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="days-container" id="daysContainer">
+            <!-- Days will be generated by JavaScript -->
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="totalCompleted">0</div>
+                <div class="stat-label">Tasks Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalDays">0</div>
+                <div class="stat-label">Days Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="currentStreak">0</div>
+                <div class="stat-label">Current Streak</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="weekCompletion">0%</div>
+                <div class="stat-label">Week Completion</div>
+            </div>
+        </div>
+
+        <center>
+            <button class="reset-btn" onclick="resetAllProgress()">🔄 Reset All Progress</button>
+        </center>
+    </div>
+
+    <script>
+        const days = [
+            { name: 'Monday', study: 'Node.js Study' },
+            { name: 'Tuesday', study: 'FB Ads Study' },
+            { name: 'Wednesday', study: 'E-commerce Study' },
+            { name: 'Thursday', study: 'Node.js Study' },
+            { name: 'Friday', study: 'FB Ads Study' },
+            { name: 'Saturday', study: 'Node.js Study' },
+            { name: 'Sunday', study: 'E-commerce Study' }
+        ];
+
+        const schedule = [
+            { time: '5:30-6:00 AM', activity: 'Wake Up + Cold Shower', section: 'morning' },
+            { time: '6:00-6:30 AM', activity: 'Yoga + Pranayama', section: 'morning' },
+            { time: '6:30-7:00 AM', activity: 'Meditation (Ajna focus)', section: 'morning' },
+            { time: '7:00-7:30 AM', activity: 'Spiritual Reading', section: 'morning' },
+            { time: '7:30-8:00 AM', activity: 'Breakfast (Fruits + Nuts + Milk/Oats)', section: 'morning' },
+            { time: '9:00-1:00 PM', activity: 'Office Work (High priority tasks)', section: 'work' },
+            { time: '1:00-1:30 PM', activity: 'Lunch (Chapati/Rice + Dal + Veg + Salad)', section: 'work' },
+            { time: '1:30-2:00 PM', activity: 'Short Walk + Breathing', section: 'work' },
+            { time: '2:00-6:00 PM', activity: 'Office Work (Focus mode)', section: 'work' },
+            { time: '6:30-7:00 PM', activity: 'Snack (Fruit + Green Tea)', section: 'evening' },
+            { time: '7:00-8:00 PM', activity: '', section: 'evening', special: true }, // Will be filled with study topic
+            { time: '8:00-8:30 PM', activity: 'Dinner (Khichdi/Soup/Chapati + Sabzi)', section: 'evening' },
+            { time: '8:30-9:00 PM', activity: 'Relax with music or silent walk', section: 'evening' },
+            { time: '9:00-10:00 PM', activity: 'Book Reading + Interview Prep', section: 'evening' },
+            { time: '10:00-10:20 PM', activity: 'Meditation + Gratitude Journal', section: 'evening' },
+            { time: '10:30 PM', activity: 'Sleep (No screens)', section: 'evening' }
+        ];
+
+        let progressData = {};
+
+        function initializeData() {
+            const saved = localStorage.getItem('brahmacharya-progress');
+            if (saved) {
+                progressData = JSON.parse(saved);
+            } else {
+                days.forEach((day, dayIndex) => {
+                    progressData[dayIndex] = {
+                        tasks: new Array(16).fill(false),
+                        reflection: ''
+                    };
+                });
+                saveProgress();
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem('brahmacharya-progress', JSON.stringify(progressData));
+        }
+
+        function createDayCard(day, dayIndex) {
+            const currentSchedule = [...schedule];
+            currentSchedule[10].activity = day.study; // Update study activity
+
+            const completedTasks = progressData[dayIndex].tasks.filter(Boolean).length;
+            const dayProgress = Math.round((completedTasks / 16) * 100);
+
+            let currentSection = '';
+            let sectionsHtml = '';
+
+            currentSchedule.forEach((item, itemIndex) => {
+                if (item.section !== currentSection) {
+                    if (currentSection !== '') {
+                        sectionsHtml += '</div>';
+                    }
+                    currentSection = item.section;
+                    const sectionNames = {
+                        'morning': '🌅 Morning Routine',
+                        'work': '💼 Work Hours',
+                        'evening': '🌙 Evening Routine'
+                    };
+                    sectionsHtml += `
+                        <div class="schedule-section">
+                            <div class="section-title">
+                                <div class="section-icon ${item.section}"></div>
+                                ${sectionNames[item.section]}
+                            </div>
+                    `;
+                }
+
+                const isChecked = progressData[dayIndex].tasks[itemIndex] ? 'checked' : '';
+                const activityClass = item.special ? 'special-activity' : '';
+                
+                sectionsHtml += `
+                    <div class="schedule-item">
+                        <input type="checkbox" class="checkbox" ${isChecked} 
+                               onchange="updateTask(${dayIndex}, ${itemIndex}, this.checked)">
+                        <span class="schedule-time">${item.time}</span>
+                        <span class="schedule-activity ${activityClass}">${item.activity}</span>
+                    </div>
+                `;
+            });
+            sectionsHtml += '</div>';
+
+            const isCompleted = completedTasks === 16 ? 'completed' : '';
+
+            return `
+                <div class="day-card ${isCompleted}">
+                    <div class="day-header">
+                        <div class="day-name">${day.name}</div>
+                        <div class="day-progress">${completedTasks}/16 (${dayProgress}%)</div>
+                    </div>
+                    
+                    ${sectionsHtml}
+                    
+                    <div class="daily-reflection">
+                        <strong>📝 Daily Reflection:</strong>
+                        <textarea class="reflection-input" 
+                                  placeholder="How did today go? Any insights or challenges?"
+                                  onchange="updateReflection(${dayIndex}, this.value)">${progressData[dayIndex].reflection}</textarea>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateTask(dayIndex, taskIndex, isChecked) {
+            progressData[dayIndex].tasks[taskIndex] = isChecked;
+            saveProgress();
+            renderApp();
+        }
+
+        function updateReflection(dayIndex, reflection) {
+            progressData[dayIndex].reflection = reflection;
+            saveProgress();
+        }
+
+        function calculateStats() {
+            const totalTasks = days.length * 16;
+            let completedTasks = 0;
+            let completedDays = 0;
+            let currentStreak = 0;
+            let streakActive = true;
+
+            days.forEach((day, dayIndex) => {
+                const dayCompleted = progressData[dayIndex].tasks.filter(Boolean).length;
+                completedTasks += dayCompleted;
+                
+                if (dayCompleted === 16) {
+                    completedDays++;
+                    if (streakActive) {
+                        currentStreak++;
+                    }
+                } else {
+                    streakActive = false;
+                }
+            });
+
+            const weekCompletion = Math.round((completedTasks / totalTasks) * 100);
+
+            return {
+                totalCompleted: completedTasks,
+                totalDays: completedDays,
+                currentStreak,
+                weekCompletion
+            };
+        }
+
+        function updateStats() {
+            const stats = calculateStats();
+            
+            document.getElementById('totalCompleted').textContent = stats.totalCompleted;
+            document.getElementById('totalDays').textContent = stats.totalDays;
+            document.getElementById('currentStreak').textContent = stats.currentStreak;
+            document.getElementById('weekCompletion').textContent = stats.weekCompletion + '%';
+            document.getElementById('weekProgress').textContent = stats.weekCompletion + '%';
+            document.getElementById('progressFill').style.width = stats.weekCompletion + '%';
+        }
+
+        function renderApp() {
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = days.map((day, index) => createDayCard(day, index)).join('');
+            updateStats();
+        }
+
+        function resetAllProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                days.forEach((day, dayIndex) => {
+                    progressData[dayIndex] = {
+                        tasks: new Array(16).fill(false),
+                        reflection: ''
+                    };
+                });
+                saveProgress();
+                renderApp();
+            }
+        }
+
+        // Initialize the app
+        initializeData();
+        renderApp();
+    </script>
+</body>
+</html>
