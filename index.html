@@ -1004,26 +1004,32 @@ class EnhancedPlanner {
     }
 
     renderTaskSection(sectionName, containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const tasks = this.schedule.filter(t => t.section === sectionName);
-        const dayData = this.getDayData();
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const tasks = this.schedule.filter(t => t.section === sectionName);
+    const dayData = this.getDayData();
 
-        container.innerHTML = tasks.map(task => {
-            const globalIndex = this.schedule.indexOf(task);
-            const isCompleted = !!dayData.tasks[globalIndex];
-            return `
-                <div class="task-item ${isCompleted ? 'completed' : ''}">
-                    <div class="task-checkbox ${isCompleted ? 'checked' : ''}" onclick="window.toggleTask(${globalIndex})"></div>
-                    <div class="task-time">${task.time}</div>
-                    <div class="task-activity ${task.special ? 'special' : ''}">
-                        ${task.activity}
-                        <div class="task-motivation">${task.motivation || ''}</div>
-                    </div>
+    container.innerHTML = tasks.map((task, taskSectionIndex) => {
+        // Fix: Calculate correct global index
+        const globalIndex = this.schedule.findIndex(scheduleTask => 
+            scheduleTask.time === task.time && 
+            scheduleTask.activity === task.activity && 
+            scheduleTask.section === task.section
+        );
+        const isCompleted = !!dayData.tasks[globalIndex];
+        return `
+            <div class="task-item ${isCompleted ? 'completed' : ''}">
+                <div class="task-checkbox ${isCompleted ? 'checked' : ''}" onclick="app.toggleTask(${globalIndex}); event.stopPropagation();"></div>
+                <div class="task-time">${task.time}</div>
+                <div class="task-activity ${task.special ? 'special' : ''}">
+                    ${task.activity}
+                    <div class="task-motivation">${task.motivation || ''}</div>
                 </div>
-            `;
-        }).join('');
-    }
+            </div>
+        `;
+    }).join('');
+}
+
 
     toggleTask(taskIndex) {
         const dayData = this.getDayData();
