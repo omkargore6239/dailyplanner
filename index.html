@@ -1167,6 +1167,14 @@ class EnhancedPlanner {
             
            html += `<div class="${dayClass}" data-date="${d.toISOString().split('T')[0]}" style="cursor: pointer;">${day}</div>`;}
         container.innerHTML = html;
+        container.querySelectorAll('.calendar-day[data-date]').forEach(dayEl => {
+    dayEl.addEventListener('click', () => {
+        const dateStr = dayEl.getAttribute('data-date');
+        if (dateStr && window.appInstance) {
+            window.appInstance.selectDate(dateStr);
+        }
+    });
+});
     }
 
     selectDate(dateString) {
