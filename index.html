@@ -1,1283 +1,776 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Brahmacharya Planner</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --accent-color: #10ac84;
-            --warning-color: #ff6b6b;
-            --success-color: #26de81;
-            --text-dark: #2c2c54;
-            --text-light: #5f27cd;
-            --bg-light: #f8f9ff;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --border-radius: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            min-height: 100vh;
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header Styles */
-        .header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .header h1 {
-            font-size: 2.8rem;
-            color: white;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            font-weight: 700;
-        }
-
-        .header-subtitle {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 20px;
-        }
-
-        .current-date {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: inline-block;
-            font-weight: 600;
-            color: white;
-        }
-
-        /* Navigation Tabs */
-        .nav-tabs {
-            display: flex;
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 8px;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-            gap: 8px;
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 15px 20px;
-            background: transparent;
-            border: none;
-            border-radius: calc(var(--border-radius) - 8px);
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-light);
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .nav-tab.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .nav-tab:hover:not(.active) {
-            background: var(--bg-light);
-            transform: translateY(-1px);
-        }
-
-        /* Stats Dashboard */
-        .stats-dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            text-align: center;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-icon {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 0.95rem;
-            color: var(--text-light);
-            font-weight: 500;
-        }
-
-        /* Calendar View */
-        .calendar-container {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 30px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .calendar-nav {
-            background: var(--bg-light);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            color: var(--text-light);
-            transition: var(--transition);
-        }
-
-        .calendar-nav:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .calendar-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            background: var(--bg-light);
-            padding: 2px;
-            border-radius: 12px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            background: var(--bg-light);
-        }
-
-        .calendar-day.today {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .calendar-day.completed {
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .calendar-day.partial {
-            background: linear-gradient(45deg, var(--accent-color) 50%, white 50%);
-        }
-
-        /* Content Views */
-        .view-container {
-            display: none;
-        }
-
-        .view-container.active {
-            display: block;
-        }
-
-        /* Daily View */
-        .daily-container {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .daily-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--bg-light);
-        }
-
-        .daily-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .daily-progress {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .progress-ring {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: conic-gradient(var(--accent-color) var(--progress, 0%), var(--bg-light) 0%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: var(--text-dark);
-            position: relative;
-        }
-
-        .progress-ring::before {
-            content: '';
-            position: absolute;
-            width: 75%;
-            height: 75%;
-            background: white;
-            border-radius: 50%;
-        }
-
-        .progress-text {
-            position: relative;
-            z-index: 1;
-            font-size: 0.9rem;
-        }
-
-        /* Schedule Sections */
-        .schedule-section {
-            margin-bottom: 30px;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: var(--bg-light);
-            border-radius: 12px;
-        }
-
-        .section-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: white;
-        }
-
-        .morning-icon { background: linear-gradient(135deg, #ffa502, #ff6348); }
-        .work-icon { background: linear-gradient(135deg, #3742fa, #2f3542); }
-        .evening-icon { background: linear-gradient(135deg, #5f27cd, #341f97); }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: white;
-            border: 2px solid var(--bg-light);
-            border-radius: 12px;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .task-item:hover {
-            border-color: var(--primary-color);
-            transform: translateX(5px);
-        }
-
-        .task-item.completed {
-            border-color: var(--accent-color);
-            background: linear-gradient(135deg, rgba(16, 172, 132, 0.1), rgba(38, 222, 129, 0.05));
-        }
-
-        .task-checkbox {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            border: 2px solid var(--text-light);
-            margin-right: 15px;
-            cursor: pointer;
-            position: relative;
-            transition: var(--transition);
-        }
-
-        .task-checkbox.checked {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-
-        .task-checkbox.checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .task-time {
-            font-weight: 600;
-            color: var(--text-light);
-            min-width: 140px;
-            font-size: 0.9rem;
-        }
-
-        .task-activity {
-            flex: 1;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .task-activity.special {
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-
-        /* Weekly View */
-        .weekly-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .day-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .day-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-        }
-
-        .day-card.completed {
-            border-color: var(--accent-color);
-            background: linear-gradient(135deg, rgba(16, 172, 132, 0.05), white);
-        }
-
-        .day-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .day-name {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .day-score {
-            background: var(--bg-light);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            color: var(--text-light);
-        }
-
-        /* Monthly View */
-        .monthly-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .monthly-card {
-            background: white;
-            padding: 25px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--card-shadow);
-            text-align: center;
-        }
-
-        .monthly-chart {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-        }
-
-        /* Reflection Section */
-        .reflection-section {
-            margin-top: 30px;
-            padding: 25px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-            border-radius: var(--border-radius);
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .reflection-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .reflection-input {
-            width: 100%;
-            border: 2px solid var(--bg-light);
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-            min-height: 100px;
-            transition: var(--transition);
-        }
-
-        .reflection-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            justify-content: center;
-        }
-
-        .action-btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--warning-color), #ee5a24);
-            color: white;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .app-container {
-                padding: 15px;
-            }
-
-            .header h1 {
-                font-size: 2.2rem;
-            }
-
-            .nav-tabs {
-                flex-direction: column;
-            }
-
-            .stats-dashboard {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-
-            .daily-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .task-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .task-time {
-                min-width: auto;
-            }
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-light);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--secondary-color);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Career Switch Planner</title>
+
+  <!-- Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --primary-color:#667eea;
+      --secondary-color:#764ba2;
+      --accent-color:#10ac84;
+      --warning-color:#ff6b6b;
+      --success-color:#26de81;
+      --text-dark:#2c2c54;
+      --text-light:#5f27cd;
+      --muted:#6b7280;
+      --bg-light:#f8f9ff;
+      --card-shadow:0 10px 30px rgba(0,0,0,0.1);
+      --border-radius:16px;
+      --transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+      background:linear-gradient(135deg,var(--primary-color) 0,var(--secondary-color) 100%);
+      min-height:100vh;color:var(--text-dark);line-height:1.6;
+    }
+    .app-container{max-width:1400px;margin:0 auto;padding:20px}
+    /* Header */
+    .header{background:linear-gradient(135deg,#ff6b6b 0,#ee5a24 100%);border-radius:var(--border-radius);padding:30px;text-align:center;margin-bottom:30px;box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+    .header:before{content:"";position:absolute;top:-50px;left:-50px;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,0.1) 0,transparent 70%);animation:rotate 20s linear infinite}
+    @keyframes rotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .header-content{position:relative;z-index:2}
+    .header h1{font-size:2.4rem;color:#fff;margin-bottom:10px;text-shadow:2px 2px 4px rgba(0,0,0,0.3);font-weight:700}
+    .header-subtitle{font-size:1.05rem;color:rgba(255,255,255,0.92);margin-bottom:16px}
+    .current-date{background:rgba(255,255,255,0.2);padding:10px 20px;border-radius:25px;display:inline-block;font-weight:600;color:#fff}
+
+    /* Tabs */
+    .nav-tabs{display:flex;background:#fff;border-radius:14px;padding:8px;margin:20px 0 30px;box-shadow:var(--card-shadow);gap:8px;flex-wrap:wrap}
+    .nav-tab{flex:1;min-width:120px;padding:12px 16px;background:transparent;border:none;border-radius:12px;cursor:pointer;font-size:0.98rem;font-weight:600;color:#374151;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px}
+    .nav-tab.active{background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));color:#fff;transform:translateY(-2px)}
+    .nav-tab:hover:not(.active){background:var(--bg-light);transform:translateY(-1px)}
+
+    /* Stats */
+    .stats-dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px}
+    .stat-card{background:#fff;padding:22px;border-radius:14px;box-shadow:var(--card-shadow);text-align:center;transition:var(--transition);position:relative;overflow:hidden;border:2px solid transparent}
+    .stat-card:hover{transform:translateY(-4px);border-color:var(--primary-color)}
+    .stat-card .stat-icon{font-size:1.6rem;margin-bottom:10px;color:var(--primary-color)}
+    .stat-number{font-size:2rem;font-weight:800;color:#111827;margin-bottom:6px}
+    .stat-label{font-size:0.92rem;color:#6b7280;font-weight:600}
+
+    /* Views */
+    .view-container{display:none}
+    .view-container.active{display:block}
+
+    /* Daily */
+    .daily-container{background:#fff;border-radius:16px;padding:26px;box-shadow:var(--card-shadow)}
+    .daily-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:14px;border-bottom:2px solid var(--bg-light)}
+    .daily-title{font-size:1.5rem;font-weight:800;color:#111827}
+    .daily-progress{display:flex;align-items:center;gap:12px}
+    .progress-ring{width:56px;height:56px;border-radius:50%;background:conic-gradient(var(--accent-color) var(--progress,0%), var(--bg-light) 0);display:flex;align-items:center;justify-content:center;font-weight:800;color:#111827;position:relative}
+    .progress-ring:before{content:"";position:absolute;width:70px;height:70px;background:#fff;border-radius:50%}
+    .progress-text{position:relative;z-index:1;font-size:0.9rem}
+
+    .schedule-section{margin-bottom:22px}
+    .section-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:12px;background:var(--bg-light);border-radius:12px}
+    .section-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;color:#fff}
+    .morning-icon{background:linear-gradient(135deg,#ffa502,#ff6348)}
+    .work-icon{background:linear-gradient(135deg,#3742fa,#2f3542)}
+    .evening-icon{background:linear-gradient(135deg,#5f27cd,#341f97)}
+    .study-icon{background:linear-gradient(135deg,#10ac84,#26de81)}
+
+    .task-item{display:flex;align-items:flex-start;gap:14px;padding:14px;margin-bottom:10px;background:#fff;border:2px solid var(--bg-light);border-radius:12px;transition:var(--transition);cursor:pointer}
+    .task-item:hover{border-color:var(--primary-color);transform:translateX(4px)}
+    .task-item.completed{border-color:var(--accent-color);background:linear-gradient(135deg,rgba(16,172,132,0.08),rgba(38,222,129,0.05))}
+    .task-checkbox{width:22px;height:22px;border-radius:6px;border:2px solid #9ca3af;margin-top:2px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0}
+    .task-checkbox.checked{background:var(--accent-color);border-color:var(--accent-color)}
+    .task-checkbox.checked:after{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:10px;height:10px;background:#fff;border-radius:2px}
+    .task-time{font-weight:700;color:#6b7280;min-width:140px;font-size:0.88rem}
+    .task-activity{flex:1;font-weight:600;color:#111827}
+    .task-activity.special{color:var(--warning-color)}
+    .task-motivation{margin-top:6px;font-size:0.82rem;line-height:1.35;color:#6b7280}
+
+    /* Weekly */
+    .weekly-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+    .day-card{background:#fff;border-radius:16px;padding:22px;box-shadow:var(--card-shadow);border:2px solid transparent;transition:var(--transition)}
+    .day-card:hover{transform:translateY(-4px);border-color:var(--primary-color)}
+    .day-card.completed{border-color:var(--accent-color);background:linear-gradient(135deg,rgba(16,172,132,0.06),#fff)}
+    .day-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .day-name{font-size:1.2rem;font-weight:800;color:#111827}
+    .day-score{background:var(--bg-light);padding:6px 12px;border-radius:20px;font-weight:700;color:#6b7280}
+
+    /* Monthly */
+    .calendar-container{background:#fff;border-radius:16px;padding:22px;box-shadow:var(--card-shadow);margin-bottom:20px}
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .calendar-nav{background:var(--bg-light);border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:1rem;color:#374151;transition:var(--transition)}
+    .calendar-nav:hover{background:var(--primary-color);color:#fff}
+    .calendar-title{font-size:1.3rem;font-weight:800;color:#111827}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:var(--bg-light);padding:2px;border-radius:12px}
+    .calendar-day{aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;cursor:pointer;transition:var(--transition);position:relative}
+    .calendar-day.today{background:var(--primary-color);color:#fff}
+    .calendar-day.completed{background:var(--accent-color);color:#fff}
+    .calendar-day.partial{background:linear-gradient(45deg,var(--accent-color) 50%,#fff 50%)}
+
+    .monthly-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .monthly-card{background:#fff;padding:22px;border-radius:14px;box-shadow:var(--card-shadow);text-align:center}
+    .monthly-card .stat-icon{font-size:1.3rem;margin-bottom:8px;color:var(--primary-color)}
+    .monthly-card .stat-number{font-size:1.6rem;font-weight:800;color:#111827;margin-bottom:6px}
+    .monthly-card .stat-label{font-size:0.9rem;color:#6b7280;font-weight:700}
+
+    /* Study view */
+    .study-container{background:#fff;border-radius:16px;padding:22px;box-shadow:var(--card-shadow)}
+    .topics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .topic-card{background:#fff;border:2px solid var(--bg-light);border-radius:14px;padding:18px;transition:var(--transition)}
+    .topic-card:hover{border-color:var(--primary-color);transform:translateY(-3px)}
+    .topic-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .topic-title{font-weight:800;color:#111827}
+    .topic-progress{font-weight:800;color:#374151;background:var(--bg-light);padding:4px 10px;border-radius:20px}
+    .subtopic{display:flex;align-items:flex-start;gap:10px;margin:8px 0}
+    .subtopic input{margin-top:3px}
+    .subtopic label{font-size:0.93rem;color:#111827}
+    .topic-footer{margin-top:10px;font-size:0.85rem;color:#6b7280}
+
+    /* Reflection + actions */
+    .reflection-section{margin-top:20px;padding:18px;background:linear-gradient(135deg,rgba(102,126,234,0.05),rgba(118,75,162,0.05));border-radius:14px;border-left:4px solid var(--primary-color)}
+    .reflection-title{font-size:1.05rem;font-weight:800;color:#111827;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+    .reflection-input{width:100%;border:2px solid var(--bg-light);background:#fff;padding:12px;border-radius:12px;font-family:inherit;font-size:0.98rem;min-height:100px;resize:vertical;transition:var(--transition)}
+    .reflection-input:focus{outline:none;border-color:var(--primary-color)}
+    .action-buttons{display:flex;gap:14px;margin-top:20px;justify-content:center}
+    .action-btn{padding:10px 20px;border:none;border-radius:25px;cursor:pointer;font-size:0.98rem;font-weight:800;transition:var(--transition);display:flex;align-items:center;gap:8px}
+    .btn-primary{background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));color:#fff}
+    .btn-danger{background:linear-gradient(135deg,var(--warning-color),#ee5a24);color:#fff}
+    .action-btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.2)}
+
+    @media (max-width:768px){
+      .app-container{padding:15px}
+      .header h1{font-size:2rem}
+      .nav-tabs{flex-direction:column}
+      .task-item{flex-direction:column;align-items:flex-start}
+      .task-time{min-width:auto}
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <h1><i class="fas fa-om"></i> Brahmacharya Planner</h1>
-                <div class="header-subtitle">Advanced Spiritual Discipline Tracker</div>
-                <div class="current-date" id="currentDate"></div>
-            </div>
-        </div>
-
-        <!-- Navigation Tabs -->
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-view="daily">
-                <i class="fas fa-calendar-day"></i> Daily
-            </button>
-            <button class="nav-tab" data-view="weekly">
-                <i class="fas fa-calendar-week"></i> Weekly
-            </button>
-            <button class="nav-tab" data-view="monthly">
-                <i class="fas fa-calendar-alt"></i> Monthly
-            </button>
-            <button class="nav-tab" data-view="analytics">
-                <i class="fas fa-chart-line"></i> Analytics
-            </button>
-        </div>
-
-        <!-- Stats Dashboard -->
-        <div class="stats-dashboard">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                <div class="stat-number" id="todayTasks">0</div>
-                <div class="stat-label">Today's Tasks</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-fire"></i></div>
-                <div class="stat-number" id="currentStreak">0</div>
-                <div class="stat-label">Current Streak</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                <div class="stat-number" id="weekProgress">0%</div>
-                <div class="stat-label">Week Progress</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
-                <div class="stat-number" id="monthProgress">0%</div>
-                <div class="stat-label">Month Progress</div>
-            </div>
-        </div>
-
-        <!-- Daily View -->
-        <div class="view-container active" id="dailyView">
-            <div class="daily-container">
-                <div class="daily-header">
-                    <h2 class="daily-title" id="dailyTitle">Today's Schedule</h2>
-                    <div class="daily-progress">
-                        <div class="progress-ring" id="dailyProgressRing">
-                            <div class="progress-text" id="dailyProgressText">0%</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Morning Section -->
-                <div class="schedule-section">
-                    <div class="section-header">
-                        <div class="section-icon morning-icon">
-                            <i class="fas fa-sun"></i>
-                        </div>
-                        <div class="section-title">Morning Routine</div>
-                    </div>
-                    <div id="morningTasks"></div>
-                </div>
-
-                <!-- Work Section -->
-                <div class="schedule-section">
-                    <div class="section-header">
-                        <div class="section-icon work-icon">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <div class="section-title">Work Hours</div>
-                    </div>
-                    <div id="workTasks"></div>
-                </div>
-
-                <!-- Evening Section -->
-                <div class="schedule-section">
-                    <div class="section-header">
-                        <div class="section-icon evening-icon">
-                            <i class="fas fa-moon"></i>
-                        </div>
-                        <div class="section-title">Evening Routine</div>
-                    </div>
-                    <div id="eveningTasks"></div>
-                </div>
-
-                <!-- Reflection Section -->
-                <div class="reflection-section">
-                    <div class="reflection-title">
-                        <i class="fas fa-pen-fancy"></i>
-                        Daily Reflection
-                    </div>
-                    <textarea class="reflection-input" id="dailyReflection" 
-                              placeholder="How did today go? What insights did you gain? Any challenges faced?"></textarea>
-                </div>
-            </div>
-        </div>
-
-        <!-- Weekly View -->
-        <div class="view-container" id="weeklyView">
-            <div class="weekly-grid" id="weeklyGrid"></div>
-        </div>
-
-        <!-- Monthly View -->
-        <div class="view-container" id="monthlyView">
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <button class="calendar-nav" id="prevMonth">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <div class="calendar-title" id="monthTitle">October 2024</div>
-                    <button class="calendar-nav" id="nextMonth">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
-            </div>
-
-            <div class="monthly-stats">
-                <div class="monthly-card">
-                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                    <div class="stat-number" id="monthlyCompleted">0</div>
-                    <div class="stat-label">Days Completed</div>
-                </div>
-                <div class="monthly-card">
-                    <div class="stat-icon"><i class="fas fa-percentage"></i></div>
-                    <div class="stat-number" id="monthlyAverage">0%</div>
-                    <div class="stat-label">Average Completion</div>
-                </div>
-                <div class="monthly-card">
-                    <div class="stat-icon"><i class="fas fa-medal"></i></div>
-                    <div class="stat-number" id="bestStreak">0</div>
-                    <div class="stat-label">Best Streak</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analytics View -->
-        <div class="view-container" id="analyticsView">
-            <div class="monthly-chart">
-                <h3><i class="fas fa-chart-bar"></i> Progress Analytics</h3>
-                <p>Analytics charts and detailed progress tracking coming soon...</p>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="action-btn btn-primary" onclick="exportData()">
-                <i class="fas fa-download"></i> Export Data
-            </button>
-            <button class="action-btn btn-danger" onclick="resetAllProgress()">
-                <i class="fas fa-redo"></i> Reset All
-            </button>
-        </div>
+  <div class="app-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <h1><i class="fas fa-om"></i> Career Switch Planner</h1>
+        <div class="header-subtitle">Daily schedule, study tracker, and progress—optimized for Mon–Sat office hours</div>
+        <div class="current-date" id="currentDate"></div>
+      </div>
     </div>
 
-    <script>
-        // Enhanced Application State
-        class BrahmacharyyaPlanner {
-            constructor() {
-                this.currentDate = new Date();
-                this.currentView = 'daily';
-                this.currentMonth = new Date();
-                this.data = this.loadData();
-                this.schedule = this.getSchedule();
-                this.init();
-            }
+    <!-- Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="daily"><i class="fas fa-calendar-day"></i> Daily</button>
+      <button class="nav-tab" data-view="weekly"><i class="fas fa-calendar-week"></i> Weekly</button>
+      <button class="nav-tab" data-view="monthly"><i class="fas fa-calendar-alt"></i> Monthly</button>
+      <button class="nav-tab" data-view="study"><i class="fas fa-book-open"></i> Study</button>
+      <button class="nav-tab" data-view="analytics"><i class="fas fa-chart-line"></i> Analytics</button>
+    </div>
 
-            getSchedule() {
-                return [
-                    { time: '5:30-6:00 AM', activity: 'Wake Up + Cold Shower', section: 'morning' },
-                    { time: '6:00-6:30 AM', activity: 'Yoga + Pranayama', section: 'morning' },
-                    { time: '6:30-7:00 AM', activity: 'Meditation (Ajna focus)', section: 'morning' },
-                    { time: '7:00-7:30 AM', activity: 'Spiritual Reading', section: 'morning' },
-                    { time: '7:30-8:00 AM', activity: 'Breakfast (Fruits + Nuts + Milk/Oats)', section: 'morning' },
-                    { time: '9:00-1:00 PM', activity: 'Office Work (High priority tasks)', section: 'work' },
-                    { time: '1:00-1:30 PM', activity: 'Lunch (Chapati/Rice + Dal + Veg + Salad)', section: 'work' },
-                    { time: '1:30-2:00 PM', activity: 'Short Walk + Breathing', section: 'work' },
-                    { time: '2:00-6:00 PM', activity: 'Office Work (Focus mode)', section: 'work' },
-                    { time: '6:30-7:00 PM', activity: 'Snack (Fruit + Green Tea)', section: 'evening' },
-                    { time: '7:00-8:00 PM', activity: this.getTodayStudy(), section: 'evening', special: true },
-                    { time: '8:00-8:30 PM', activity: 'Dinner (Khichdi/Soup/Chapati + Sabzi)', section: 'evening' },
-                    { time: '8:30-9:00 PM', activity: 'Relax with music or silent walk', section: 'evening' },
-                    { time: '9:00-10:00 PM', activity: 'Book Reading + Interview Prep', section: 'evening' },
-                    { time: '10:00-10:20 PM', activity: 'Meditation + Gratitude Journal', section: 'evening' },
-                    { time: '10:30 PM', activity: 'Sleep (No screens)', section: 'evening' }
-                ];
-            }
+    <!-- Stats -->
+    <div class="stats-dashboard">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-number" id="todayTasks">0</div>
+        <div class="stat-label">Today’s Tasks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-fire"></i></div>
+        <div class="stat-number" id="currentStreak">0</div>
+        <div class="stat-label">Current Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+        <div class="stat-number" id="weekProgress">0%</div>
+        <div class="stat-label">Week Progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+        <div class="stat-number" id="monthProgress">0%</div>
+        <div class="stat-label">Month Progress</div>
+      </div>
+    </div>
 
-            getTodayStudy() {
-                const studies = {
-                    0: 'E-commerce Study', // Sunday
-                    1: 'Node.js Study',    // Monday
-                    2: 'FB Ads Study',     // Tuesday
-                    3: 'E-commerce Study', // Wednesday
-                    4: 'Node.js Study',    // Thursday
-                    5: 'FB Ads Study',     // Friday
-                    6: 'Node.js Study'     // Saturday
-                };
-                return studies[this.currentDate.getDay()];
-            }
+    <!-- Daily View -->
+    <div class="view-container active" id="dailyView">
+      <div class="daily-container">
+        <div class="daily-header">
+          <h2 class="daily-title" id="dailyTitle">Today’s Schedule</h2>
+          <div class="daily-progress">
+            <div class="progress-ring" id="dailyProgressRing">
+              <div class="progress-text" id="dailyProgressText">0%</div>
+            </div>
+          </div>
+        </div>
 
-            loadData() {
-                const saved = localStorage.getItem('brahmacharya-enhanced-data');
-                if (saved) {
-                    return JSON.parse(saved);
-                }
-                return {};
-            }
+        <div class="schedule-section">
+          <div class="section-header">
+            <div class="section-icon morning-icon"><i class="fas fa-sun"></i></div>
+            <div class="section-title">Morning Routine</div>
+          </div>
+          <div id="morningTasks"></div>
+        </div>
 
-            saveData() {
-                localStorage.setItem('brahmacharya-enhanced-data', JSON.stringify(this.data));
-            }
+        <div class="schedule-section">
+          <div class="section-header">
+            <div class="section-icon work-icon"><i class="fas fa-briefcase"></i></div>
+            <div class="section-title">Work Hours</div>
+          </div>
+          <div id="workTasks"></div>
+        </div>
 
-            getDateKey(date = this.currentDate) {
-                return date.toISOString().split('T')[0];
-            }
+        <div class="schedule-section">
+          <div class="section-header">
+            <div class="section-icon evening-icon"><i class="fas fa-moon"></i></div>
+            <div class="section-title">Evening Routine</div>
+          </div>
+          <div id="eveningTasks"></div>
+        </div>
 
-            getDayData(date = this.currentDate) {
-                const key = this.getDateKey(date);
-                if (!this.data[key]) {
-                    this.data[key] = {
-                        tasks: new Array(16).fill(false),
-                        reflection: '',
-                        date: key
-                    };
-                }
-                return this.data[key];
-            }
+        <div class="reflection-section">
+          <div class="reflection-title"><i class="fas fa-pen-fancy"></i> Daily Reflection</div>
+          <textarea class="reflection-input" id="dailyReflection" placeholder="How did today go? What did you learn? Any challenges?"></textarea>
+        </div>
+      </div>
+    </div>
 
-            init() {
-                this.updateCurrentDate();
-                this.setupEventListeners();
-                this.renderCurrentView();
-                this.updateStats();
-            }
+    <!-- Weekly View -->
+    <div class="view-container" id="weeklyView">
+      <div class="weekly-grid" id="weeklyGrid"></div>
+    </div>
 
-            updateCurrentDate() {
-                const options = { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                };
-                document.getElementById('currentDate').textContent = 
-                    this.currentDate.toLocaleDateString('en-US', options);
-            }
+    <!-- Monthly View -->
+    <div class="view-container" id="monthlyView">
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <button class="calendar-nav" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+          <div class="calendar-title" id="monthTitle">Month</div>
+          <button class="calendar-nav" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </div>
+      <div class="monthly-stats">
+        <div class="monthly-card">
+          <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+          <div class="stat-number" id="monthlyCompleted">0</div>
+          <div class="stat-label">Days Completed</div>
+        </div>
+        <div class="monthly-card">
+          <div class="stat-icon"><i class="fas fa-percentage"></i></div>
+          <div class="stat-number" id="monthlyAverage">0%</div>
+          <div class="stat-label">Average Completion</div>
+        </div>
+        <div class="monthly-card">
+          <div class="stat-icon"><i class="fas fa-medal"></i></div>
+          <div class="stat-number" id="bestStreak">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+    </div>
 
-            setupEventListeners() {
-                // Navigation tabs
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        this.switchView(tab.dataset.view);
-                    });
-                });
+    <!-- Study View -->
+    <div class="view-container" id="studyView">
+      <div class="study-container">
+        <h3 class="daily-title" style="margin-bottom:12px">Topic‑wise Study Tracker</h3>
+        <div class="topics-grid" id="topicsGrid"></div>
+        <div class="reflection-section">
+          <div class="reflection-title"><i class="fas fa-bullseye"></i> Today’s Study Focus</div>
+          <div id="todayStudyFocus" style="color:#374151;font-weight:700"></div>
+        </div>
+      </div>
+    </div>
 
-                // Calendar navigation
-                document.getElementById('prevMonth').addEventListener('click', () => {
-                    this.currentMonth.setMonth(this.currentMonth.getMonth() - 1);
-                    this.renderMonthlyView();
-                });
+    <!-- Analytics View -->
+    <div class="view-container" id="analyticsView">
+      <div class="daily-container">
+        <h3 class="daily-title" style="margin-bottom:10px"><i class="fas fa-chart-bar"></i> Progress Analytics</h3>
+        <p style="color:#6b7280">Charts and deeper analytics can be added here later—current view shows streaks and completion across Daily/Weekly/Monthly. </p>
+      </div>
+    </div>
 
-                document.getElementById('nextMonth').addEventListener('click', () => {
-                    this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
-                    this.renderMonthlyView();
-                });
+    <!-- Actions -->
+    <div class="action-buttons">
+      <button class="action-btn btn-primary" onclick="exportData()"><i class="fas fa-download"></i> Export Data</button>
+      <button class="action-btn btn-danger" onclick="resetAllProgress()"><i class="fas fa-redo"></i> Reset All</button>
+    </div>
+  </div>
 
-                // Daily reflection
-                document.getElementById('dailyReflection').addEventListener('input', (e) => {
-                    const dayData = this.getDayData();
-                    dayData.reflection = e.target.value;
-                    this.saveData();
-                });
-            }
+  <script>
+    class CareerPlanner {
+      constructor(){
+        this.currentDate = new Date();
+        this.currentView = 'daily';
+        this.currentMonth = new Date();
+        this.data = this.loadData();
+        this.motivationLines = [
+          "You should do this task.",
+          "Look at your mother and father.",
+          "You have to pay EMIs.",
+          "You have to pay the relative’s loan.",
+          "Do it for your mother and father."
+        ];
+        this.init();
+      }
 
-            switchView(viewName) {
-                // Update active tab
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
-
-                // Hide all views
-                document.querySelectorAll('.view-container').forEach(view => {
-                    view.classList.remove('active');
-                });
-
-                // Show selected view
-                document.getElementById(`${viewName}View`).classList.add('active');
-
-                this.currentView = viewName;
-                this.renderCurrentView();
-            }
-
-            renderCurrentView() {
-                switch (this.currentView) {
-                    case 'daily':
-                        this.renderDailyView();
-                        break;
-                    case 'weekly':
-                        this.renderWeeklyView();
-                        break;
-                    case 'monthly':
-                        this.renderMonthlyView();
-                        break;
-                    case 'analytics':
-                        this.renderAnalyticsView();
-                        break;
-                }
-            }
-
-            renderDailyView() {
-                const dayData = this.getDayData();
-                
-                // Update daily title
-                const options = { weekday: 'long', month: 'long', day: 'numeric' };
-                document.getElementById('dailyTitle').textContent = 
-                    this.currentDate.toLocaleDateString('en-US', options) + "'s Schedule";
-
-                // Render tasks by section
-                this.renderTaskSection('morning', 'morningTasks');
-                this.renderTaskSection('work', 'workTasks');
-                this.renderTaskSection('evening', 'eveningTasks');
-
-                // Update reflection
-                document.getElementById('dailyReflection').value = dayData.reflection || '';
-
-                // Update progress
-                this.updateDailyProgress();
-            }
-
-            renderTaskSection(sectionName, containerId) {
-                const container = document.getElementById(containerId);
-                const tasks = this.schedule.filter(task => task.section === sectionName);
-                const dayData = this.getDayData();
-
-                container.innerHTML = tasks.map((task, index) => {
-                    const globalIndex = this.schedule.indexOf(task);
-                    const isCompleted = dayData.tasks[globalIndex];
-                    
-                    return `
-                        <div class="task-item ${isCompleted ? 'completed' : ''}" 
-                             onclick="app.toggleTask(${globalIndex})">
-                            <div class="task-checkbox ${isCompleted ? 'checked' : ''}"></div>
-                            <div class="task-time">${task.time}</div>
-                            <div class="task-activity ${task.special ? 'special' : ''}">${task.activity}</div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            toggleTask(taskIndex) {
-                const dayData = this.getDayData();
-                dayData.tasks[taskIndex] = !dayData.tasks[taskIndex];
-                this.saveData();
-                this.renderDailyView();
-                this.updateStats();
-            }
-
-            updateDailyProgress() {
-                const dayData = this.getDayData();
-                const completedTasks = dayData.tasks.filter(Boolean).length;
-                const totalTasks = dayData.tasks.length;
-                const percentage = Math.round((completedTasks / totalTasks) * 100);
-
-                document.getElementById('dailyProgressText').textContent = `${percentage}%`;
-                document.getElementById('dailyProgressRing').style.setProperty('--progress', `${percentage}%`);
-            }
-
-            renderWeeklyView() {
-                const container = document.getElementById('weeklyGrid');
-                const startOfWeek = new Date(this.currentDate);
-                startOfWeek.setDate(this.currentDate.getDate() - this.currentDate.getDay());
-
-                let weeklyHtml = '';
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(startOfWeek);
-                    date.setDate(startOfWeek.getDate() + i);
-                    const dayData = this.getDayData(date);
-                    const completedTasks = dayData.tasks.filter(Boolean).length;
-                    const percentage = Math.round((completedTasks / 16) * 100);
-                    
-                    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                    
-                    weeklyHtml += `
-                        <div class="day-card ${percentage === 100 ? 'completed' : ''}">
-                            <div class="day-card-header">
-                                <div class="day-name">${dayNames[date.getDay()]}</div>
-                                <div class="day-score">${completedTasks}/16 (${percentage}%)</div>
-                            </div>
-                            <div class="day-progress-bar" style="background: linear-gradient(90deg, var(--accent-color) ${percentage}%, var(--bg-light) ${percentage}%); height: 8px; border-radius: 4px; margin: 10px 0;"></div>
-                            <p style="color: var(--text-light); font-size: 0.9rem;">${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                        </div>
-                    `;
-                }
-                container.innerHTML = weeklyHtml;
-            }
-
-            renderMonthlyView() {
-                // Update month title
-                const monthTitle = this.currentMonth.toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    year: 'numeric' 
-                });
-                document.getElementById('monthTitle').textContent = monthTitle;
-
-                // Render calendar grid
-                this.renderCalendarGrid();
-                this.updateMonthlyStats();
-            }
-
-            renderCalendarGrid() {
-                const container = document.getElementById('calendarGrid');
-                const year = this.currentMonth.getFullYear();
-                const month = this.currentMonth.getMonth();
-                
-                // Get first day of month and number of days
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                const daysInMonth = lastDay.getDate();
-                const startingDay = firstDay.getDay();
-
-                // Create calendar grid
-                let calendarHtml = '';
-                
-                // Day headers
-                const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                dayHeaders.forEach(day => {
-                    calendarHtml += `<div class="calendar-day" style="font-weight: 700; background: var(--bg-light); cursor: default;">${day}</div>`;
-                });
-
-                // Empty cells for days before month starts
-                for (let i = 0; i < startingDay; i++) {
-                    calendarHtml += `<div class="calendar-day" style="cursor: default;"></div>`;
-                }
-
-                // Days of the month
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(year, month, day);
-                    const dayData = this.getDayData(date);
-                    const completedTasks = dayData.tasks.filter(Boolean).length;
-                    
-                    let dayClass = 'calendar-day';
-                    if (this.isSameDay(date, this.currentDate)) {
-                        dayClass += ' today';
-                    } else if (completedTasks === 16) {
-                        dayClass += ' completed';
-                    } else if (completedTasks > 0) {
-                        dayClass += ' partial';
-                    }
-
-                    calendarHtml += `
-                        <div class="${dayClass}" onclick="app.selectDate('${date.toISOString().split('T')[0]}')">
-                            ${day}
-                        </div>
-                    `;
-                }
-
-                container.innerHTML = calendarHtml;
-            }
-
-            selectDate(dateString) {
-                this.currentDate = new Date(dateString);
-                this.switchView('daily');
-                this.updateCurrentDate();
-            }
-
-            isSameDay(date1, date2) {
-                return date1.getDate() === date2.getDate() &&
-                       date1.getMonth() === date2.getMonth() &&
-                       date1.getFullYear() === date2.getFullYear();
-            }
-
-            updateMonthlyStats() {
-                const year = this.currentMonth.getFullYear();
-                const month = this.currentMonth.getMonth();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                
-                let completedDays = 0;
-                let totalTasks = 0;
-                let completedTasks = 0;
-                let streaks = [];
-                let currentStreak = 0;
-
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(year, month, day);
-                    const dayData = this.getDayData(date);
-                    const dayCompleted = dayData.tasks.filter(Boolean).length;
-                    
-                    totalTasks += 16;
-                    completedTasks += dayCompleted;
-                    
-                    if (dayCompleted === 16) {
-                        completedDays++;
-                        currentStreak++;
-                    } else {
-                        if (currentStreak > 0) {
-                            streaks.push(currentStreak);
-                            currentStreak = 0;
-                        }
-                    }
-                }
-
-                if (currentStreak > 0) {
-                    streaks.push(currentStreak);
-                }
-
-                const averageCompletion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                const bestStreak = streaks.length > 0 ? Math.max(...streaks) : 0;
-
-                document.getElementById('monthlyCompleted').textContent = completedDays;
-                document.getElementById('monthlyAverage').textContent = averageCompletion + '%';
-                document.getElementById('bestStreak').textContent = bestStreak;
-            }
-
-            renderAnalyticsView() {
-                // Placeholder for analytics
-                console.log('Analytics view rendered');
-            }
-
-            updateStats() {
-                // Today's tasks
-                const todayData = this.getDayData();
-                const todayCompleted = todayData.tasks.filter(Boolean).length;
-                document.getElementById('todayTasks').textContent = `${todayCompleted}/16`;
-
-                // Current streak
-                const streak = this.calculateCurrentStreak();
-                document.getElementById('currentStreak').textContent = streak;
-
-                // Week progress
-                const weekProgress = this.calculateWeekProgress();
-                document.getElementById('weekProgress').textContent = weekProgress + '%';
-
-                // Month progress
-                const monthProgress = this.calculateMonthProgress();
-                document.getElementById('monthProgress').textContent = monthProgress + '%';
-            }
-
-            calculateCurrentStreak() {
-                let streak = 0;
-                let date = new Date(this.currentDate);
-                
-                while (true) {
-                    const dayData = this.getDayData(date);
-                    const completed = dayData.tasks.filter(Boolean).length;
-                    
-                    if (completed === 16) {
-                        streak++;
-                        date.setDate(date.getDate() - 1);
-                    } else {
-                        break;
-                    }
-                }
-                
-                return streak;
-            }
-
-            calculateWeekProgress() {
-                const startOfWeek = new Date(this.currentDate);
-                startOfWeek.setDate(this.currentDate.getDate() - this.currentDate.getDay());
-                
-                let totalTasks = 0;
-                let completedTasks = 0;
-                
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(startOfWeek);
-                    date.setDate(startOfWeek.getDate() + i);
-                    const dayData = this.getDayData(date);
-                    
-                    totalTasks += 16;
-                    completedTasks += dayData.tasks.filter(Boolean).length;
-                }
-                
-                return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-            }
-
-            calculateMonthProgress() {
-                const year = this.currentDate.getFullYear();
-                const month = this.currentDate.getMonth();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                
-                let totalTasks = 0;
-                let completedTasks = 0;
-                
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(year, month, day);
-                    const dayData = this.getDayData(date);
-                    
-                    totalTasks += 16;
-                    completedTasks += dayData.tasks.filter(Boolean).length;
-                }
-                
-                return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-            }
+      // Persistence
+      loadData(){
+        const saved = localStorage.getItem('career-planner-data');
+        if(saved){
+          try { return JSON.parse(saved); } catch(e){ /* fallthrough */ }
         }
+        return {_study:this.getDefaultStudyPlan()};
+      }
+      saveData(){ localStorage.setItem('career-planner-data', JSON.stringify(this.data)); }
 
-        // Global functions
-        function exportData() {
-            const data = app.data;
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `brahmacharya-data-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-        }
-
-        function resetAllProgress() {
-            if (confirm('Are you sure you want to reset all progress? This action cannot be undone.')) {
-                localStorage.removeItem('brahmacharya-enhanced-data');
-                location.reload();
+      // Study plan
+      getDefaultStudyPlan(){
+        return {
+          topics:{
+            react:{
+              title:"React.js",
+              subs:[
+                "Hooks: useState/useEffect",
+                "Forms & Validation",
+                "Routing & Params",
+                "Performance & Memoization",
+                "State Management (Context/Redux)"
+              ],
+              done: [false,false,false,false,false]
+            },
+            rn:{
+              title:"React Native",
+              subs:[
+                "Navigation & Params",
+                "FlatList & Performance",
+                "Styling & Theming",
+                "APIs & Error Handling",
+                "Native Modules & Permissions"
+              ],
+              done: [false,false,false,false,false]
+            },
+            node:{
+              title:"Node.js",
+              subs:[
+                "Express Basics",
+                "REST APIs & Routing",
+                "MongoDB & Mongoose",
+                "Auth with JWT",
+                "File Uploads & Validation"
+              ],
+              done: [false,false,false,false,false]
+            },
+            english:{
+              title:"English Communication",
+              subs:[
+                "Tech vocabulary",
+                "Explain projects clearly",
+                "Behavioral answers (STAR)",
+                "Mock interviews (record)",
+                "Pronunciation & clarity"
+              ],
+              done: [false,false,false,false,false]
             }
-        }
+          }
+        };
+      }
 
-        // Initialize the application
-        let app;
-        document.addEventListener('DOMContentLoaded', () => {
-            app = new BrahmacharyyaPlanner();
+      // Day-specific study focus
+      getTodayStudy(date=this.currentDate){
+        const d = (date instanceof Date) ? date.getDay() : new Date(date).getDay();
+        // 0 Sun, 1 Mon, ... 6 Sat
+        const map = {
+          0:{key:'english', label:'System Design + Applications + English'},
+          1:{key:'node', label:'Node.js'},
+          2:{key:'english', label:'English Communication'},
+          3:{key:'react', label:'React.js'},
+          4:{key:'node', label:'Node.js'},
+          5:{key:'rn', label:'React Native'},
+          6:{key:'react', label:'React.js'}
+        };
+        return map[d] || {key:'react', label:'React.js'};
+      }
+
+      // Dynamic schedule per day
+      getSchedule(date=this.currentDate){
+        const d = (date instanceof Date) ? date.getDay() : new Date(date).getDay();
+        const isSunday = d === 0;
+        const studyFocus = this.getTodayStudy(date);
+        const baseMorning = [
+          {time:"5:30–6:00 AM", activity:"Wake up + Cold shower", section:"morning"},
+          {time:"6:00–6:30 AM", activity:"Yoga / Pranayama", section:"morning"},
+          {time:"6:30–7:00 AM", activity:"Meditation (Ajna focus)", section:"morning"},
+          {time:"7:00–7:30 AM", activity:"Reading (Spiritual/Design/Docs)", section:"morning"},
+          {time:"7:30–8:00 AM", activity:"Breakfast (Fruits/Nuts/Oats)", section:"morning"}
+        ];
+        const baseEveningCommon = [
+          {time:"6:30–7:00 PM", activity:"Snack + Green tea", section:"evening"},
+          {time:"7:00–8:30 PM", activity:`Study: ${studyFocus.label}`, section:"evening", special:true},
+          {time:"8:30–9:00 PM", activity:"English speaking practice", section:"evening"},
+          {time:"9:00–10:00 PM", activity:"Interview prep / Project review", section:"evening"},
+          {time:"10:00–10:20 PM", activity:"Meditation + Gratitude journal", section:"evening"},
+          {time:"10:30 PM", activity:"Sleep (no screens)", section:"evening"}
+        ];
+
+        if(isSunday){
+          // Sunday: deeper study + applications, no office
+          return [
+            ...baseMorning,
+            {time:"8:30–10:30 AM", activity:`Deep study: ${studyFocus.label}`, section:"morning", special:true},
+            {time:"11:00 AM–1:00 PM", activity:"Build/Refactor portfolio project", section:"work"},
+            {time:"2:00–4:00 PM", activity:"Mock interviews + DSA basics", section:"work"},
+            {time:"4:30–5:30 PM", activity:"Resume/LinkedIn/Applications", section:"work"},
+            ...baseEveningCommon
+          ].map(t=>({...t, motivation:this.motivationLines}));
+        }
+        // Mon–Sat: office 9–6
+        const office = [
+          {time:"9:00 AM–1:00 PM", activity:"Office work (high‑priority)", section:"work"},
+          {time:"1:00–1:30 PM", activity:"Lunch + unwind", section:"work"},
+          {time:"1:30–2:00 PM", activity:"Short walk + breathing", section:"work"},
+          {time:"2:00–6:00 PM", activity:"Office work (focus mode)", section:"work"}
+        ];
+        return [
+          ...baseMorning,
+          ...office,
+          ...baseEveningCommon
+        ].map(t=>({...t, motivation:this.motivationLines}));
+      }
+
+      // Data per day (resizes when schedule length changes)
+      getDateKey(date=this.currentDate){
+        const d = (date instanceof Date) ? date : new Date(date);
+        return d.toISOString().split('T')[0];
+      }
+      getDayData(date=this.currentDate){
+        const key = this.getDateKey(date);
+        const tasksLen = this.getSchedule(date).length;
+        if(!this.data[key]){
+          this.data[key] = {tasks:new Array(tasksLen).fill(false), reflection:"", date:key};
+          this.saveData();
+          return this.data[key];
+        }
+        // Resize task array if schedule changed
+        if(!Array.isArray(this.data[key].tasks) || this.data[key].tasks.length !== tasksLen){
+          const old = Array.isArray(this.data[key].tasks) ? this.data[key].tasks : [];
+          const resized = new Array(tasksLen).fill(false).map((v,i)=>old[i]||false);
+          this.data[key].tasks = resized;
+          this.saveData();
+        }
+        return this.data[key];
+      }
+
+      // UI init
+      init(){
+        this.updateCurrentDate();
+        this.setupEventListeners();
+        this.renderCurrentView();
+        this.updateStats();
+      }
+      updateCurrentDate(){
+        const options = {weekday:'long', year:'numeric', month:'long', day:'numeric'};
+        document.getElementById('currentDate').textContent = this.currentDate.toLocaleDateString('en-US', options);
+      }
+      setupEventListeners(){
+        // Tabs
+        document.querySelectorAll('.nav-tab').forEach(tab=>{
+          tab.addEventListener('click', ()=>this.switchView(tab.dataset.view));
         });
-    </script>
+        // Month nav
+        document.getElementById('prevMonth').addEventListener('click', ()=>{
+          this.currentMonth.setMonth(this.currentMonth.getMonth()-1);
+          this.renderMonthlyView();
+        });
+        document.getElementById('nextMonth').addEventListener('click', ()=>{
+          this.currentMonth.setMonth(this.currentMonth.getMonth()+1);
+          this.renderMonthlyView();
+        });
+        // Reflection
+        document.getElementById('dailyReflection').addEventListener('input', (e)=>{
+          const day = this.getDayData();
+          day.reflection = e.target.value;
+          this.saveData();
+        });
+      }
+      switchView(view){
+        document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelector(`[data-view="${view}"]`).classList.add('active');
+        document.querySelectorAll('.view-container').forEach(v=>v.classList.remove('active'));
+        document.getElementById(view+'View')?.classList.add('active');
+        this.currentView = view;
+        this.renderCurrentView();
+      }
+      renderCurrentView(){
+        switch(this.currentView){
+          case 'daily': this.renderDailyView(); break;
+          case 'weekly': this.renderWeeklyView(); break;
+          case 'monthly': this.renderMonthlyView(); break;
+          case 'study': this.renderStudyView(); break;
+          case 'analytics': this.renderAnalyticsView(); break;
+        }
+      }
+
+      // Daily
+      renderDailyView(){
+        const options = {weekday:'long', month:'long', day:'numeric'};
+        document.getElementById('dailyTitle').textContent = this.currentDate.toLocaleDateString('en-US', options);
+        this.renderTaskSection('morning','morningTasks');
+        this.renderTaskSection('work','workTasks');
+        this.renderTaskSection('evening','eveningTasks');
+        this.updateDailyProgress();
+      }
+      renderTaskSection(sectionName, containerId){
+        const container = document.getElementById(containerId);
+        const tasks = this.getSchedule(this.currentDate).filter(t=>t.section===sectionName);
+        const dayData = this.getDayData(this.currentDate);
+        const fullSchedule = this.getSchedule(this.currentDate);
+
+        container.innerHTML = tasks.map(task=>{
+          const globalIndex = fullSchedule.indexOf(task);
+          const isCompleted = !!dayData.tasks[globalIndex];
+          const mot = (task.motivation || this.motivationLines).join(' • ');
+          return `
+            <div class="task-item ${isCompleted?'completed':''}" onclick="app.toggleTask(${globalIndex})">
+              <div class="task-checkbox ${isCompleted?'checked':''}"></div>
+              <div class="task-time">${task.time}</div>
+              <div class="task-activity ${task.special?'special':''}">
+                ${task.activity}
+                <div class="task-motivation">
+                  ${mot}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      toggleTask(idx){
+        const day = this.getDayData(this.currentDate);
+        day.tasks[idx] = !day.tasks[idx];
+        this.saveData();
+        this.renderDailyView();
+        this.updateStats();
+      }
+      updateDailyProgress(){
+        const day = this.getDayData(this.currentDate);
+        const total = this.getSchedule(this.currentDate).length;
+        const done = day.tasks.filter(Boolean).length;
+        const pct = total ? Math.round(done/total*100) : 0;
+        document.getElementById('dailyProgressText').textContent = pct+'%';
+        document.getElementById('dailyProgressRing').style.setProperty('--progress', pct+'%');
+      }
+
+      // Weekly
+      renderWeeklyView(){
+        const container = document.getElementById('weeklyGrid');
+        const start = new Date(this.currentDate);
+        start.setDate(this.currentDate.getDate() - this.currentDate.getDay());
+        let html = '';
+        const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        for(let i=0;i<7;i++){
+          const d = new Date(start); d.setDate(start.getDate()+i);
+          const full = this.getSchedule(d);
+          const dayData = this.getDayData(d);
+          const done = dayData.tasks.filter(Boolean).length;
+          const pct = full.length ? Math.round(done/full.length*100) : 0;
+          html += `
+            <div class="day-card ${pct===100?'completed':''}">
+              <div class="day-card-header">
+                <div class="day-name">${dayNames[d.getDay()]}</div>
+                <div class="day-score">${done}/${full.length} • ${pct}%</div>
+              </div>
+              <div style="height:8px;border-radius:4px;background:linear-gradient(90deg,var(--accent-color) ${pct}%, var(--bg-light) ${pct}%);margin:10px 0"></div>
+              <p style="color:#6b7280;font-size:0.9rem">${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</p>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      }
+
+      // Monthly
+      renderMonthlyView(){
+        const title = this.currentMonth.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+        document.getElementById('monthTitle').textContent = title;
+        this.renderCalendarGrid();
+        this.updateMonthlyStats();
+      }
+      renderCalendarGrid(){
+        const container = document.getElementById('calendarGrid');
+        const y = this.currentMonth.getFullYear();
+        const m = this.currentMonth.getMonth();
+        const first = new Date(y,m,1);
+        const last = new Date(y,m+1,0);
+        const days = last.getDate();
+        const startDay = first.getDay();
+
+        let html = '';
+        const headers = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        headers.forEach(h=>{
+          html += `<div class="calendar-day" style="font-weight:700;background:var(--bg-light);cursor:default">${h}</div>`;
+        });
+        for(let i=0;i<startDay;i++){ html += `<div class="calendar-day" style="cursor:default"></div>`; }
+        for(let d=1; d<=days; d++){
+          const dt = new Date(y,m,d);
+          const dd = this.getDayData(dt);
+          const total = this.getSchedule(dt).length;
+          const done = dd.tasks.filter(Boolean).length;
+          let cls = 'calendar-day';
+          if(this.isSameDay(dt,this.currentDate)) cls += ' today';
+          else if(total>0 && done===total) cls += ' completed';
+          else if(done>0) cls += ' partial';
+          html += `<div class="${cls}" onclick="app.selectDate('${dt.toISOString().split('T')[0]}')">${d}</div>`;
+        }
+        container.innerHTML = html;
+      }
+      selectDate(dateStr){
+        this.currentDate = new Date(dateStr);
+        this.switchView('daily');
+        this.updateCurrentDate();
+      }
+      isSameDay(a,b){ return a.getDate()===b.getDate() && a.getMonth()===b.getMonth() && a.getFullYear()===b.getFullYear(); }
+
+      updateMonthlyStats(){
+        const y = this.currentMonth.getFullYear();
+        const m = this.currentMonth.getMonth();
+        const days = new Date(y,m+1,0).getDate();
+        let completedDays=0,totalTasks=0,completedTasks=0,streaks=[],current=0;
+
+        for(let d=1; d<=days; d++){
+          const dt = new Date(y,m,d);
+          const dayData = this.getDayData(dt);
+          const tlen = this.getSchedule(dt).length;
+          const done = dayData.tasks.filter(Boolean).length;
+          totalTasks += tlen;
+          completedTasks += done;
+          const fullComplete = tlen>0 && done===tlen;
+          if(fullComplete){ current++; } else { if(current>0) streaks.push(current); current=0; }
+        }
+        if(current>0) streaks.push(current);
+        const avg = totalTasks ? Math.round(completedTasks/totalTasks*100) : 0;
+        const best = streaks.length ? Math.max(...streaks) : 0;
+        document.getElementById('monthlyCompleted').textContent = completedDays; // optional if needed
+        document.getElementById('monthlyAverage').textContent = avg + '%';
+        document.getElementById('bestStreak').textContent = best;
+      }
+
+      // Study view
+      renderStudyView(){
+        const grid = document.getElementById('topicsGrid');
+        const plan = this.data._study || this.getDefaultStudyPlan();
+        const topics = plan.topics;
+        const blocks = Object.keys(topics).map(key=>{
+          const t = topics[key];
+          const total = t.subs.length;
+          const done = t.done.filter(Boolean).length;
+          const pct = total ? Math.round(done/total*100) : 0;
+          const subs = t.subs.map((s,i)=>{
+            const checked = t.done[i] ? 'checked' : '';
+            return `
+              <div class="subtopic">
+                <input type="checkbox" ${checked} onchange="app.toggleSubtopic('${key}',${i})"/>
+                <label>${s}</label>
+              </div>
+            `;
+          }).join('');
+          return `
+            <div class="topic-card">
+              <div class="topic-header">
+                <div class="topic-title"><i class="fas fa-book"></i> ${t.title}</div>
+                <div class="topic-progress">${pct}%</div>
+              </div>
+              ${subs}
+              <div class="topic-footer">Complete subtopics to raise your progress.</div>
+            </div>
+          `;
+        }).join('');
+        grid.innerHTML = blocks;
+
+        const focus = this.getTodayStudy(this.currentDate);
+        const label = (topics[focus.key]?.title) ? topics[focus.key].title : focus.label;
+        document.getElementById('todayStudyFocus').textContent = `Focus today: ${label}`;
+      }
+      toggleSubtopic(topicKey, idx){
+        if(!this.data._study) this.data._study = this.getDefaultStudyPlan();
+        const t = this.data._study.topics[topicKey];
+        if(!t) return;
+        t.done[idx] = !t.done[idx];
+        this.saveData();
+        this.renderStudyView();
+      }
+
+      // Analytics placeholder
+      renderAnalyticsView(){
+        // Extend with charts if needed
+      }
+
+      // Stats
+      updateStats(){
+        const today = this.getDayData(this.currentDate);
+        const tlen = this.getSchedule(this.currentDate).length;
+        const done = today.tasks.filter(Boolean).length;
+        document.getElementById('todayTasks').textContent = `${done}/${tlen}`;
+
+        document.getElementById('currentStreak').textContent = this.calculateCurrentStreak();
+        document.getElementById('weekProgress').textContent = this.calculateWeekProgress() + '%';
+        document.getElementById('monthProgress').textContent = this.calculateMonthProgress() + '%';
+      }
+      calculateCurrentStreak(){
+        let streak=0;
+        let d = new Date(this.currentDate);
+        while(true){
+          const day = this.getDayData(d);
+          const total = this.getSchedule(d).length;
+          const done = day.tasks.filter(Boolean).length;
+          if(total>0 && done===total){ streak++; d.setDate(d.getDate()-1); }
+          else break;
+        }
+        return streak;
+      }
+      calculateWeekProgress(){
+        const start = new Date(this.currentDate);
+        start.setDate(this.currentDate.getDate()-this.currentDate.getDay());
+        let total=0,done=0;
+        for(let i=0;i<7;i++){
+          const d = new Date(start); d.setDate(start.getDate()+i);
+          const dd = this.getDayData(d);
+          const tlen = this.getSchedule(d).length;
+          total += tlen;
+          done += dd.tasks.filter(Boolean).length;
+        }
+        return total ? Math.round(done/total*100) : 0;
+      }
+      calculateMonthProgress(){
+        const y = this.currentDate.getFullYear();
+        const m = this.currentDate.getMonth();
+        const days = new Date(y,m+1,0).getDate();
+        let total=0,done=0;
+        for(let d=1; d<=days; d++){
+          const dt = new Date(y,m,d);
+          const dd = this.getDayData(dt);
+          const tlen = this.getSchedule(dt).length;
+          total += tlen;
+          done += dd.tasks.filter(Boolean).length;
+        }
+        return total ? Math.round(done/total*100) : 0;
+      }
+    }
+
+    // Globals
+    let app;
+    document.addEventListener('DOMContentLoaded', ()=>{ app = new CareerPlanner(); });
+
+    // Export/Reset
+    function exportData(){
+      const data = app.data;
+      const str = JSON.stringify(data,null,2);
+      const blob = new Blob([str],{type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `career-planner-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+    function resetAllProgress(){
+      if(confirm('Reset all progress? This cannot be undone.')){
+        localStorage.removeItem('career-planner-data');
+        location.reload();
+      }
+    }
+  </script>
 </body>
 </html>
