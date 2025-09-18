@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Job Switch Planner</title>
+    <title>ॐ Enhanced Job Switch Planner</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -60,6 +60,13 @@
         .header p {
             color: rgba(255, 255, 255, 0.9);
             font-size: 1.1rem;
+        }
+
+        .om-symbol {
+            font-size: 3rem;
+            margin-right: 15px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         /* Navigation Styles */
@@ -186,6 +193,8 @@
             margin-right: 15px;
             position: relative;
             transition: var(--transition);
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         .task-checkbox.checked {
@@ -569,8 +578,8 @@
     <div class="app-container">
         <!-- Header -->
         <div class="header">
-            <h1><i class="fas fa-rocket"></i> Job Switch Success Planner</h1>
-            <p id="currentDate">Track your journey to a better career</p>
+            <h1><span class="om-symbol">ॐ</span><i class="fas fa-rocket"></i> Job Switch Success Planner</h1>
+            <p id="currentDate">Track your spiritual journey to career success</p>
         </div>
 
         <!-- Navigation Tabs -->
@@ -769,24 +778,22 @@ class EnhancedPlanner {
         this.currentDate = new Date();
         this.currentView = 'daily';
         this.currentMonth = new Date();
-        this.startDate = this.normalizeDate(new Date()); // anchors the 8-week plan from today
+        this.startDate = this.normalizeDate(new Date()); 
         this.officeDays = [1, 2, 3, 4, 5, 6]; // Mon-Sat
         this.data = this.loadData();
         this.motivationPool = [
-            "You should do this task - success requires action.",                           // 1
-            "Look at mother and father and move forward - make them proud.",        // 2
-            "EMIs won't pay themselves - stay disciplined and focused.",           // 3
-            "Repay the relative's loan - honor your commitments.",           // 4
-            "Do it for mother and father - their sacrifice deserves your success."        // 5
+            "You should do this task - success requires action.",
+            "Look at mother and father and move forward - make them proud.",
+            "EMIs won't pay themselves - stay disciplined and focused.",
+            "Repay the relative's loan - honor your commitments.",
+            "Do it for mother and father - their sacrifice deserves your success."
         ];
         
-        // Rotating motivational line per day
         this.getMotivation = (index = 0) => {
             const dayIndex = this.currentDate.getDay();
             return this.motivationPool[(dayIndex + index) % this.motivationPool.length];
         };
 
-        // 8-week rolling plan generator by day offset
         this.studyThemeByWeek = [
             { name: "React Fundamentals", code: "react-core" },
             { name: "React Advanced", code: "react-adv" },
@@ -798,7 +805,6 @@ class EnhancedPlanner {
             { name: "Interview Prep", code: "interview" }
         ];
 
-        // Subtasks template by theme (kept concise and repeatable)
         this.studySubtasks = {
             "react-core":   ["Learn hooks without AI", "Build form component", "Fix existing bugs", "Practice 10 Q&A"],
             "react-adv":    ["Master Context/Redux", "Performance optimization", "Code review session", "Advanced concepts quiz"],
@@ -810,16 +816,11 @@ class EnhancedPlanner {
             "interview":    ["Project explanations", "DSA problem solving", "System design practice", "HR interview prep"]
         };
 
-        // Persisted study progress: { [topicId]: { title, doneDates: { [dateKey]: boolean }, doneCount: number } }
         if (!this.data.studyProgress) this.data.studyProgress = {};
-
-        // Build today's schedule at construct time
         this.schedule = this.getSchedule(this.currentDate);
-
         this.init();
     }
 
-    // ---------- Storage ----------
     loadData() {
         const saved = localStorage.getItem('job-switch-enhanced-data');
         return saved ? JSON.parse(saved) : {};
@@ -829,7 +830,6 @@ class EnhancedPlanner {
         localStorage.setItem('job-switch-enhanced-data', JSON.stringify(this.data));
     }
 
-    // ---------- Dates ----------
     normalizeDate(d) {
         const x = new Date(d);
         x.setHours(0, 0, 0, 0);
@@ -840,8 +840,6 @@ class EnhancedPlanner {
         return this.normalizeDate(date).toISOString().split('T')[0];
     }
 
-    // ---------- Study plan ----------
-    // Map day offset to week theme
     getThemeForDate(date) {
         const offset = Math.floor((this.normalizeDate(date) - this.normalizeDate(this.startDate)) / (1000 * 60 * 60 * 24));
         const weekIndex = Math.floor(offset / 7) % this.studyThemeByWeek.length;
@@ -849,7 +847,6 @@ class EnhancedPlanner {
         return theme;
     }
 
-    // Generate a study topic ID per day and subtasks
     getStudyBlock(date) {
         const theme = this.getThemeForDate(date);
         const dateKey = this.getDateKey(date);
@@ -857,7 +854,6 @@ class EnhancedPlanner {
         const title = `${theme.name} — ${dateKey}`;
         const subtasks = this.studySubtasks[theme.code] || ["Study", "Practice", "Review", "Quiz"];
         
-        // Ensure progress container exists
         if (!this.data.studyProgress[topicId]) {
             this.data.studyProgress[topicId] = { title, doneDates: {}, doneCount: 0, total: subtasks.length };
             this.saveData();
@@ -865,7 +861,6 @@ class EnhancedPlanner {
         return { topicId, title, subtasks, theme };
     }
 
-    // When a study task finishes, mark its sub-index as done on this date
     completeStudySubtask(topicId) {
         const dateKey = this.getDateKey(this.currentDate);
         const node = this.data.studyProgress[topicId];
@@ -876,32 +871,20 @@ class EnhancedPlanner {
         }
     }
 
-    // ---------- Schedule ----------
-    // Build the full day's schedule dynamically with motivations
     getSchedule(date) {
-        const day = this.normalizeDate(date).getDay(); // 0 Sun .. 6 Sat
+        const day = this.normalizeDate(date).getDay();
         const isWorkDay = this.officeDays.includes(day);
-
         const studyBlock = this.getStudyBlock(date);
-        const studyMotiv = this.getMotivation(2);
-
-        // Three study tasks mapped to subtasks for better granularity
+        
         const eveningStudyTasks = [
-            { time: "7:00-7:30 PM", activity: `${studyBlock.subtasks[0]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: studyMotiv },
+            { time: "7:00-7:30 PM", activity: `${studyBlock.subtasks[0]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: this.getMotivation(2) },
             { time: "7:30-8:00 PM", activity: `${studyBlock.subtasks[1]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: this.getMotivation(3) },
             { time: "8:00-8:30 PM", activity: `${studyBlock.subtasks[2]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: this.getMotivation(4) }
         ];
 
-        // Core daily routine with motivational lines
-        const morningMotiv = this.getMotivation(0);
-        const workMotiv = this.getMotivation(1);
-        const eveMotiv1 = this.getMotivation(2);
-        const eveMotiv2 = this.getMotivation(3);
-        const eveMotiv3 = this.getMotivation(4);
-
         const schedule = [
             // Morning
-            { time: "5:30-6:00 AM", activity: "Wake up + Morning routine", section: "morning", motivation: morningMotiv },
+            { time: "5:30-6:00 AM", activity: "Wake up + Morning routine", section: "morning", motivation: this.getMotivation(0) },
             { time: "6:00-6:30 AM", activity: "Study: Core concepts (React/Node)", section: "morning", motivation: "Build your future - every morning counts." },
             { time: "6:30-7:00 AM", activity: "Practice: Code without AI", section: "morning", motivation: "Independence leads to confidence." },
             { time: "7:00-7:30 AM", activity: "English communication practice", section: "morning", motivation: "Clear communication opens doors." },
@@ -909,23 +892,21 @@ class EnhancedPlanner {
 
             // Work (Mon-Sat only)
             ...(isWorkDay ? [
-                { time: "9:00-1:00 PM", activity: "Office work — Morning focus block", section: "work", motivation: workMotiv },
+                { time: "9:00-1:00 PM", activity: "Office work — Morning focus block", section: "work", motivation: this.getMotivation(1) },
                 { time: "1:00-1:30 PM", activity: "Lunch break", section: "work", motivation: "Recharge for afternoon productivity." },
                 { time: "1:30-6:00 PM", activity: "Office work — Afternoon deliverables", section: "work", motivation: "Excellence at current job builds reputation." }
             ] : []),
 
             // Evening
-            { time: "6:30-7:00 PM", activity: "Dinner + Relaxation", section: "evening", motivation: eveMotiv1 },
+            { time: "6:30-7:00 PM", activity: "Dinner + Relaxation", section: "evening", motivation: this.getMotivation(1) },
             ...eveningStudyTasks,
             { time: "8:30-9:00 PM", activity: "English: Record project explanation", section: "evening", motivation: "Practice makes perfect interviews." },
             { time: "9:00-10:00 PM", activity: "Job applications or interview prep", section: "evening", motivation: "Every application is a step closer." },
-            { time: "10:00-10:30 PM", activity: "Plan tomorrow + Reflection", section: "evening", motivation: eveMotiv3 },
+            { time: "10:00-10:30 PM", activity: "Plan tomorrow + Reflection", section: "evening", motivation: this.getMotivation(3) },
             { time: "10:30 PM", activity: "Sleep — No screens", section: "evening", motivation: "Rest for tomorrow's achievements." }
         ];
 
-        // On Sundays (day === 0): replace office with extended study
         if (day === 0) {
-            // Add extended study slots on Sunday
             schedule.splice(5, 0, 
                 { time: "11:00 AM-12:00 PM", activity: `Weekend Project: ${studyBlock.title}`, section: "morning", special: true, studyTopicId: studyBlock.topicId, motivation: "Sunday effort pays Monday dividends." },
                 { time: "2:00-3:00 PM", activity: `${studyBlock.subtasks[3]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: "Weekend focus = weekday confidence." }
@@ -935,7 +916,6 @@ class EnhancedPlanner {
         return schedule;
     }
 
-    // ---------- Data per day with auto-migration ----------
     getDayData(targetDate = this.currentDate) {
         const key = this.getDateKey(targetDate);
         if (!this.data[key]) {
@@ -944,12 +924,10 @@ class EnhancedPlanner {
             return this.data[key];
         }
         
-        // Migrate tasks length if schedule changed
         const d = this.data[key];
         if (!Array.isArray(d.tasks)) d.tasks = [];
         if (d.tasks.length !== this.schedule.length) {
             const newArr = new Array(this.schedule.length).fill(false);
-            // carry over min length to preserve progress
             for (let i = 0; i < Math.min(d.tasks.length, newArr.length); i++) newArr[i] = !!d.tasks[i];
             d.tasks = newArr;
             this.saveData();
@@ -957,7 +935,6 @@ class EnhancedPlanner {
         return d;
     }
 
-    // ---------- UI init ----------
     init() {
         this.updateCurrentDate();
         this.setupEventListeners();
@@ -972,18 +949,15 @@ class EnhancedPlanner {
     }
 
     setupEventListeners() {
-        // Tabs
         document.querySelectorAll('.nav-tab').forEach(tab => {
             tab.addEventListener('click', () => this.switchView(tab.dataset.view));
         });
         
-        // Calendar nav
         const prev = document.getElementById('prevMonth');
         const next = document.getElementById('nextMonth');
         if (prev) prev.addEventListener('click', () => { this.currentMonth.setMonth(this.currentMonth.getMonth() - 1); this.renderMonthlyView(); });
         if (next) next.addEventListener('click', () => { this.currentMonth.setMonth(this.currentMonth.getMonth() + 1); this.renderMonthlyView(); });
         
-        // Reflection
         const refl = document.getElementById('dailyReflection');
         if (refl) refl.addEventListener('input', (e) => { const dayData = this.getDayData(); dayData.reflection = e.target.value; this.saveData(); });
     }
@@ -1011,9 +985,7 @@ class EnhancedPlanner {
         }
     }
 
-    // ---------- Daily ----------
     renderDailyView() {
-        // re-build schedule for the date in case day switched
         this.schedule = this.getSchedule(this.currentDate);
         const dayData = this.getDayData();
 
@@ -1041,8 +1013,8 @@ class EnhancedPlanner {
             const globalIndex = this.schedule.indexOf(task);
             const isCompleted = !!dayData.tasks[globalIndex];
             return `
-                <div class="task-item ${isCompleted ? 'completed' : ''}" onclick="app.toggleTask(${globalIndex})">
-                    <div class="task-checkbox ${isCompleted ? 'checked' : ''}"></div>
+                <div class="task-item ${isCompleted ? 'completed' : ''}">
+                    <div class="task-checkbox ${isCompleted ? 'checked' : ''}" onclick="window.toggleTask(${globalIndex})"></div>
                     <div class="task-time">${task.time}</div>
                     <div class="task-activity ${task.special ? 'special' : ''}">
                         ${task.activity}
@@ -1057,7 +1029,6 @@ class EnhancedPlanner {
         const dayData = this.getDayData();
         dayData.tasks[taskIndex] = !dayData.tasks[taskIndex];
 
-        // If study task toggled to complete, bump study progress for today's topic
         const task = this.schedule[taskIndex];
         if (task && task.studyTopicId && dayData.tasks[taskIndex]) {
             this.completeStudySubtask(task.studyTopicId);
@@ -1080,7 +1051,6 @@ class EnhancedPlanner {
         if (ring) ring.style.setProperty('--progress', `${percentage * 3.6}deg`);
     }
 
-    // ---------- Weekly ----------
     renderWeeklyView() {
         const container = document.getElementById('weeklyGrid');
         if (!container) return;
@@ -1121,7 +1091,6 @@ class EnhancedPlanner {
         container.innerHTML = weeklyHtml;
     }
 
-    // ---------- Monthly ----------
     renderMonthlyView() {
         const monthTitle = this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         const title = document.getElementById('monthTitle');
@@ -1165,7 +1134,7 @@ class EnhancedPlanner {
             else if (completed === this.schedule.length && this.schedule.length > 0) dayClass += ' completed';
             else if (completed > 0) dayClass += ' partial';
             
-            html += `<div class="${dayClass}" onclick="app.selectDate('${d.toISOString().split('T')[0]}')">${day}</div>`;
+            html += `<div class="${dayClass}" onclick="window.selectDate('${d.toISOString().split('T')[0]}')">${day}</div>`;
         }
         container.innerHTML = html;
     }
@@ -1215,13 +1184,10 @@ class EnhancedPlanner {
         if (c('bestStreak')) c('bestStreak').textContent = best.toString();
     }
 
-    // ---------- Analytics (placeholder kept) ----------
     renderAnalyticsView() {
-        // Keep your existing placeholder/logic
-        // console.log('Analytics view rendered');
+        // Placeholder
     }
 
-    // ---------- Study view ----------
     renderStudyView() {
         const title = document.getElementById('studyTitle');
         if (title) title.textContent = `Study Plan — ${this.getThemeForDate(this.currentDate).name}`;
@@ -1229,7 +1195,6 @@ class EnhancedPlanner {
         const upcoming = document.getElementById('studyUpcoming');
         const topicTracker = document.getElementById('topicTracker');
 
-        // Upcoming 7 days listing
         let list = '<div style="display:grid; gap:10px">';
         let total = 0, done = 0;
         
@@ -1260,7 +1225,6 @@ class EnhancedPlanner {
         if (st('studyDone')) st('studyDone').textContent = done.toString();
         if (st('studyPercent')) st('studyPercent').textContent = percent.toString();
 
-        // Topic-wise tracker (aggregate all nodes)
         let topicsHtml = '<div style="display:grid; gap:10px">';
         Object.keys(this.data.studyProgress).slice(-30).forEach(id => {
             const node = this.data.studyProgress[id];
@@ -1279,20 +1243,16 @@ class EnhancedPlanner {
         if (topicTracker) topicTracker.innerHTML = topicsHtml;
     }
 
-    // ---------- Stats ----------
     updateStats() {
-        // Today
         const dd = this.getDayData();
         const todayCompleted = dd.tasks.filter(Boolean).length;
         const elToday = document.getElementById('todayTasks');
         if (elToday) elToday.textContent = `${todayCompleted}/${this.schedule.length}`;
 
-        // Current streak (consecutive fully-complete days)
         const streak = this.calculateCurrentStreak();
         const elStreak = document.getElementById('currentStreak');
         if (elStreak) elStreak.textContent = streak.toString();
 
-        // Week and month
         const weekProgress = this.calculateWeekProgress();
         const monthProgress = this.calculateMonthProgress();
         const elWeek = document.getElementById('weekProgress');
@@ -1351,8 +1311,23 @@ class EnhancedPlanner {
     }
 }
 
-// Export and reset hooks preserved
+// Global functions - Fixed to work properly
+let app;
+
+window.toggleTask = function(taskIndex) {
+    if (app) {
+        app.toggleTask(taskIndex);
+    }
+};
+
+window.selectDate = function(dateString) {
+    if (app) {
+        app.selectDate(dateString);
+    }
+};
+
 function exportData() {
+    if (!app) return;
     const data = app.data;
     const dataStr = JSON.stringify(data, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -1371,7 +1346,6 @@ function resetAllProgress() {
 }
 
 // Initialize
-let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new EnhancedPlanner();
 });
