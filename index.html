@@ -841,11 +841,20 @@ class EnhancedPlanner {
     }
 
     getThemeForDate(date) {
+    try {
         const offset = Math.floor((this.normalizeDate(date) - this.normalizeDate(this.startDate)) / (1000 * 60 * 60 * 24));
-        const weekIndex = Math.floor(offset / 7) % this.studyThemeByWeek.length;
+        const weekIndex = Math.max(0, Math.floor(offset / 7)) % this.studyThemeByWeek.length;
         const theme = this.studyThemeByWeek[weekIndex];
-        return theme;
+        
+        // Fallback if theme is still undefined
+        return theme || { name: "React Fundamentals", code: "react-core" };
+    } catch (error) {
+        console.error('Error in getThemeForDate:', error);
+        // Return default theme on error
+        return { name: "React Fundamentals", code: "react-core" };
     }
+}
+
 
     getStudyBlock(date) {
         const theme = this.getThemeForDate(date);
@@ -1006,20 +1015,25 @@ class EnhancedPlanner {
     renderTaskSection(sectionName, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
+    
     const tasks = this.schedule.filter(t => t.section === sectionName);
     const dayData = this.getDayData();
 
-    container.innerHTML = tasks.map((task, taskSectionIndex) => {
-        // Fix: Calculate correct global index
+    container.innerHTML = tasks.map(task => {
         const globalIndex = this.schedule.findIndex(scheduleTask => 
             scheduleTask.time === task.time && 
             scheduleTask.activity === task.activity && 
             scheduleTask.section === task.section
         );
-        const isCompleted = !!dayData.tasks[globalIndex];
+        
+        const isCompleted = globalIndex >= 0 ? !!dayData.tasks[globalIndex] : false;
+        
         return `
             <div class="task-item ${isCompleted ? 'completed' : ''}">
-                <div class="task-checkbox ${isCompleted ? 'checked' : ''}" onclick="app.toggleTask(${globalIndex}); event.stopPropagation();"></div>
+                <div class="task-checkbox ${isCompleted ? 'checked' : ''}" 
+                     data-task-index="${globalIndex}"
+                     style="cursor: pointer;">
+                </div>
                 <div class="task-time">${task.time}</div>
                 <div class="task-activity ${task.special ? 'special' : ''}">
                     ${task.activity}
@@ -1028,6 +1042,17 @@ class EnhancedPlanner {
             </div>
         `;
     }).join('');
+
+    // Add click event listeners after rendering
+    container.querySelectorAll('.task-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const taskIndex = parseInt(checkbox.getAttribute('data-task-index'));
+            if (taskIndex >= 0) {
+                this.toggleTask(taskIndex);
+            }
+        });
+    });
 }
 
 
@@ -1140,17 +1165,21 @@ class EnhancedPlanner {
             else if (completed === this.schedule.length && this.schedule.length > 0) dayClass += ' completed';
             else if (completed > 0) dayClass += ' partial';
             
-            html += `<div class="${dayClass}" onclick="window.selectDate('${d.toISOString().split('T')[0]}')">${day}</div>`;
-        }
+           html += `<div class="${dayClass}" data-date="${d.toISOString().split('T')[0]}" style="cursor: pointer;">${day}</div>`;}
         container.innerHTML = html;
     }
 
     selectDate(dateString) {
+    try {
         this.currentDate = new Date(dateString);
         this.schedule = this.getSchedule(this.currentDate);
         this.switchView('daily');
         this.updateCurrentDate();
+    } catch (error) {
+        console.error('Error selecting date:', error);
     }
+}
+
 
     isSameDay(a, b) {
         return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
@@ -1333,9 +1362,10 @@ window.selectDate = function(dateString) {
     }
 };
 
+// Remove old global functions and replace with this:
 function exportData() {
-    if (!app) return;
-    const data = app.data;
+    if (!window.appInstance) return;
+    const data = window.appInstance.data;
     const dataStr = JSON.stringify(data, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const link = document.createElement('a');
@@ -1352,10 +1382,17 @@ function resetAllProgress() {
     }
 }
 
-// Initialize
+// Initialize with proper error handling
 document.addEventListener('DOMContentLoaded', () => {
-    app = new EnhancedPlanner();
+    try {
+        window.appInstance = new EnhancedPlanner();
+        console.log('App initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize app:', error);
+        alert('Failed to load planner. Please refresh the page.');
+    }
 });
+
     </script>
 </body>
 </html>
