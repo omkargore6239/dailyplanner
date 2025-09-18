@@ -1321,8 +1321,9 @@ class EnhancedPlanner {
 let app;
 
 window.toggleTask = function(taskIndex) {
-    if (app) {
-        app.toggleTask(taskIndex);
+    if (window.app && typeof window.app.toggleTask === 'function') {
+        window.app.toggleTask(taskIndex);
+        return false; // Prevent event bubbling
     }
 };
 
