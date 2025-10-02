@@ -8,34 +8,34 @@ class ModernTaskPlanner {
         
         // Essential daily tasks that should be done every day
         this.essentialTasks = [
-            { time: '05:30', title: 'Morning meditation & gratitude', category: 'spiritual', section: 'essential' },
-            { time: '06:00', title: 'Exercise or physical activity', category: 'health', section: 'essential' },
-            { time: '22:00', title: 'Plan tomorrow & reflection', category: 'personal', section: 'essential' },
-            { time: '22:30', title: 'Quality sleep preparation', category: 'health', section: 'essential' }
+            { time: '05:30', title: 'Morning meditation & gratitude', category: 'spiritual', section: 'essential', isDefault: true },
+            { time: '06:00', title: 'Exercise or physical activity', category: 'health', section: 'essential', isDefault: true },
+            { time: '22:00', title: 'Plan tomorrow & reflection', category: 'personal', section: 'essential', isDefault: true },
+            { time: '22:30', title: 'Quality sleep preparation', category: 'health', section: 'essential', isDefault: true }
         ];
 
         // Default morning routine
         this.morningTasks = [
-            { time: '06:30', title: 'Healthy breakfast', category: 'health', section: 'morning' },
-            { time: '07:00', title: 'Review daily goals', category: 'personal', section: 'morning' },
-            { time: '07:30', title: 'Get ready for the day', category: 'personal', section: 'morning' }
+            { time: '06:30', title: 'Healthy breakfast', category: 'health', section: 'morning', isDefault: true },
+            { time: '07:00', title: 'Review daily goals', category: 'personal', section: 'morning', isDefault: true },
+            { time: '07:30', title: 'Get ready for the day', category: 'personal', section: 'morning', isDefault: true }
         ];
 
         // Default work tasks
         this.workTasks = [
-            { time: '09:00', title: 'Check emails & prioritize tasks', category: 'work', section: 'work' },
-            { time: '10:00', title: 'Focus on high-priority project', category: 'work', section: 'work' },
-            { time: '13:00', title: 'Lunch break', category: 'personal', section: 'work' },
-            { time: '14:00', title: 'Afternoon work block', category: 'work', section: 'work' },
-            { time: '17:00', title: 'Wrap up and plan next day', category: 'work', section: 'work' }
+            { time: '09:00', title: 'Check emails & prioritize tasks', category: 'work', section: 'work', isDefault: true },
+            { time: '10:00', title: 'Focus on high-priority project', category: 'work', section: 'work', isDefault: true },
+            { time: '13:00', title: 'Lunch break', category: 'personal', section: 'work', isDefault: true },
+            { time: '14:00', title: 'Afternoon work block', category: 'work', section: 'work', isDefault: true },
+            { time: '17:00', title: 'Wrap up and plan next day', category: 'work', section: 'work', isDefault: true }
         ];
 
         // Default evening tasks
         this.eveningTasks = [
-            { time: '18:00', title: 'Dinner with family', category: 'family', section: 'evening' },
-            { time: '19:00', title: 'Personal learning time', category: 'study', section: 'evening' },
-            { time: '20:00', title: 'Hobby or relaxation', category: 'personal', section: 'evening' },
-            { time: '21:00', title: 'Family time', category: 'family', section: 'evening' }
+            { time: '18:00', title: 'Dinner with family', category: 'family', section: 'evening', isDefault: true },
+            { time: '19:00', title: 'Personal learning time', category: 'study', section: 'evening', isDefault: true },
+            { time: '20:00', title: 'Hobby or relaxation', category: 'personal', section: 'evening', isDefault: true },
+            { time: '21:00', title: 'Family time', category: 'family', section: 'evening', isDefault: true }
         ];
 
         this.initializeDefaultTasks();
@@ -89,6 +89,20 @@ class ModernTaskPlanner {
 
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // Sort tasks to show manual tasks first
+    sortTasks(tasks) {
+        return tasks.sort((a, b) => {
+            // Manual tasks (non-default) come first
+            if (!a.isDefault && b.isDefault) return -1;
+            if (a.isDefault && !b.isDefault) return 1;
+            
+            // Then sort by time for same type (manual or default)
+            const timeA = a.time || '00:00';
+            const timeB = b.time || '00:00';
+            return timeA.localeCompare(timeB);
+        });
     }
 
     // Initialize the application
@@ -171,9 +185,11 @@ class ModernTaskPlanner {
             description: taskDescription,
             time: taskTime || '00:00',
             category: taskType,
-            section: 'custom',
+            section: this.determineSectionForCategory(taskType),
             completed: false,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            isDefault: false, // Mark as manual task
+            isManual: true // Additional flag for manual tasks
         };
 
         const dateKey = this.getDateKey();
@@ -181,7 +197,9 @@ class ModernTaskPlanner {
             this.initializeDefaultTasks();
         }
 
-        this.data.tasks[dateKey].custom.push(newTask);
+        // Add to appropriate section based on category
+        const targetSection = this.determineSectionForCategory(taskType);
+        this.data.tasks[dateKey][targetSection].push(newTask);
         this.data.customTasks.push(newTask);
         this.saveData();
 
@@ -193,7 +211,25 @@ class ModernTaskPlanner {
         this.updateStats();
         
         // Show success message
-        this.showNotification('Task added successfully!', 'success');
+        this.showNotification('Task added to top of the list! 🎉', 'success');
+    }
+
+    // Determine which section a task should go to based on category
+    determineSectionForCategory(category) {
+        switch (category) {
+            case 'work':
+                return 'work';
+            case 'health':
+            case 'spiritual':
+                return 'essential';
+            case 'study':
+                return 'evening';
+            case 'family':
+                return 'evening';
+            case 'personal':
+            default:
+                return 'custom';
+        }
     }
 
     // FAB Actions Handler
@@ -261,12 +297,12 @@ class ModernTaskPlanner {
             dailyTitle.textContent = this.formatDate(this.currentDate);
         }
 
-        // Render each section
-        this.renderTaskSection('essential', dayTasks.essential || []);
-        this.renderTaskSection('morning', dayTasks.morning || []);
-        this.renderTaskSection('work', dayTasks.work || []);
-        this.renderTaskSection('evening', dayTasks.evening || []);
-        this.renderTaskSection('custom', dayTasks.custom || []);
+        // Render each section with sorted tasks (manual tasks first)
+        this.renderTaskSection('essential', this.sortTasks([...(dayTasks.essential || [])]));
+        this.renderTaskSection('morning', this.sortTasks([...(dayTasks.morning || [])]));
+        this.renderTaskSection('work', this.sortTasks([...(dayTasks.work || [])]));
+        this.renderTaskSection('evening', this.sortTasks([...(dayTasks.evening || [])]));
+        this.renderTaskSection('custom', this.sortTasks([...(dayTasks.custom || [])]));
 
         // Load reflection
         const reflectionTextarea = document.getElementById('dailyReflection');
@@ -283,16 +319,22 @@ class ModernTaskPlanner {
         if (!container) return;
 
         container.innerHTML = tasks.map(task => `
-            <div class="task-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id || task.title}">
+            <div class="task-item ${task.completed ? 'completed' : ''} ${task.isManual ? 'manual-task' : 'default-task'}" 
+                 data-task-id="${task.id || task.title}"
+                 title="${task.isManual ? 'Manual Task - Added by you' : 'Default Task'}">
                 <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="window.planner.toggleTask('${sectionName}', '${task.id || task.title}')">
                     ${task.completed ? '<i class="fas fa-check"></i>' : ''}
                 </div>
                 <div class="task-time">${task.time}</div>
                 <div class="task-content">
-                    <div class="task-title">${task.title}</div>
+                    <div class="task-title">
+                        ${task.isManual ? '<i class="fas fa-user-plus manual-indicator" title="Your custom task"></i> ' : ''}
+                        ${task.title}
+                    </div>
                     ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                 </div>
                 <div class="task-category ${task.category}">${task.category}</div>
+                ${task.isManual ? '<div class="task-actions"><button class="btn-delete" onclick="window.planner.deleteTask(\'' + sectionName + '\', \'' + (task.id || task.title) + '\')" title="Delete task"><i class="fas fa-trash"></i></button></div>' : ''}
             </div>
         `).join('');
     }
@@ -321,7 +363,40 @@ class ModernTaskPlanner {
             
             // Show completion animation
             if (task.completed) {
-                this.showNotification('Task completed! 🎉', 'success');
+                this.showNotification(task.isManual ? 'Your custom task completed! 🎉' : 'Task completed! 🎉', 'success');
+            }
+        }
+    }
+
+    // Delete Task (only for manual tasks)
+    deleteTask(section, taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) return;
+
+        const dateKey = this.getDateKey();
+        const dayTasks = this.data.tasks[dateKey];
+        
+        if (!dayTasks || !dayTasks[section]) return;
+
+        const taskIndex = dayTasks[section].findIndex(t => (t.id || t.title) === taskId);
+        if (taskIndex !== -1) {
+            const task = dayTasks[section][taskIndex];
+            
+            // Only allow deletion of manual tasks
+            if (task.isManual) {
+                dayTasks[section].splice(taskIndex, 1);
+                
+                // Remove from custom tasks array
+                const customTaskIndex = this.data.customTasks.findIndex(t => (t.id || t.title) === taskId);
+                if (customTaskIndex !== -1) {
+                    this.data.customTasks.splice(customTaskIndex, 1);
+                }
+                
+                this.saveData();
+                this.renderDailyView();
+                this.updateStats();
+                this.showNotification('Task deleted successfully!', 'success');
+            } else {
+                this.showNotification('Cannot delete default tasks!', 'error');
             }
         }
     }
@@ -372,7 +447,14 @@ class ModernTaskPlanner {
             if (badge && dayTasks[section]) {
                 const total = dayTasks[section].length;
                 const completed = dayTasks[section].filter(t => t.completed).length;
+                const manualCount = dayTasks[section].filter(t => t.isManual).length;
+                
                 badge.textContent = `${completed}/${total}`;
+                
+                // Add indicator for manual tasks if any exist
+                if (manualCount > 0) {
+                    badge.title = `${completed} completed out of ${total} tasks (${manualCount} custom tasks)`;
+                }
                 
                 // Update badge color based on completion
                 if (completed === total && total > 0) {

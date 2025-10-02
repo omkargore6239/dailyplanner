@@ -958,3 +958,48 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-color);
 }
+
+/* Manual Task Indicators */
+.manual-task {
+    border-left: 4px solid var(--primary-color);
+    background: linear-gradient(to right, rgba(99, 102, 241, 0.05), transparent);
+}
+
+.manual-indicator {
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+.task-actions {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.btn-delete {
+    background: transparent;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    font-size: 0.75rem;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+/* Manual task hover effects */
+.manual-task:hover {
+    border-left-color: var(--success-color);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+/* Badge tooltip styles */
+.section-badge[title] {
+    cursor: help;
+}
+
