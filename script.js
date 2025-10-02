@@ -5,6 +5,7 @@ class ModernTaskPlanner {
         this.data = this.loadData();
         this.taskCategories = ['personal', 'work', 'study', 'health', 'spiritual', 'family'];
         this.fabOpen = false;
+        this.quickTasks = []; // Store quick tasks separately
         
         // Essential daily tasks that should be done every day
         this.essentialTasks = [
@@ -48,13 +49,20 @@ class ModernTaskPlanner {
         const defaultData = {
             tasks: {},
             customTasks: [],
+            quickTasks: [],
             reflections: {},
             stats: { totalCompleted: 0, currentStreak: 0 }
         };
-        return saved ? { ...defaultData, ...JSON.parse(saved) } : defaultData;
+        const loadedData = saved ? { ...defaultData, ...JSON.parse(saved) } : defaultData;
+        
+        // Load quick tasks
+        this.quickTasks = loadedData.quickTasks || [];
+        
+        return loadedData;
     }
 
     saveData() {
+        this.data.quickTasks = this.quickTasks;
         localStorage.setItem('modern-task-planner', JSON.stringify(this.data));
     }
 
@@ -98,7 +106,14 @@ class ModernTaskPlanner {
             if (!a.isDefault && b.isDefault) return -1;
             if (a.isDefault && !b.isDefault) return 1;
             
-            // Then sort by time for same type (manual or default)
+            // Among manual tasks, sort by creation time (newest first)
+            if (!a.isDefault && !b.isDefault) {
+                const timeA = new Date(a.createdAt || 0).getTime();
+                const timeB = new Date(b.createdAt || 0).getTime();
+                return timeB - timeA; // Newest first
+            }
+            
+            // Then sort by time for default tasks
             const timeA = a.time || '00:00';
             const timeB = b.time || '00:00';
             return timeA.localeCompare(timeB);
@@ -110,6 +125,7 @@ class ModernTaskPlanner {
         this.updateCurrentDate();
         this.setupEventListeners();
         this.renderCurrentView();
+        this.renderQuickTasks();
         this.updateStats();
     }
 
@@ -131,6 +147,12 @@ class ModernTaskPlanner {
         const quickAddForm = document.getElementById('quickAddForm');
         if (quickAddForm) {
             quickAddForm.addEventListener('submit', this.handleQuickAdd.bind(this));
+        }
+
+        // Clear quick tasks
+        const clearQuickTasks = document.getElementById('clearQuickTasks');
+        if (clearQuickTasks) {
+            clearQuickTasks.addEventListener('click', this.clearQuickTasks.bind(this));
         }
 
         // Floating Action Button
@@ -183,35 +205,207 @@ class ModernTaskPlanner {
             id: this.generateId(),
             title: taskTitle,
             description: taskDescription,
-            time: taskTime || '00:00',
+            time: taskTime || new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
             category: taskType,
             section: this.determineSectionForCategory(taskType),
             completed: false,
             createdAt: new Date().toISOString(),
-            isDefault: false, // Mark as manual task
-            isManual: true // Additional flag for manual tasks
+            isDefault: false,
+            isManual: true,
+            isQuickTask: true
         };
 
+        // Add to quick tasks first (shows immediately)
+        this.quickTasks.unshift(newTask);
+
+        // Also add to appropriate section in daily tasks
         const dateKey = this.getDateKey();
         if (!this.data.tasks[dateKey]) {
             this.initializeDefaultTasks();
         }
 
-        // Add to appropriate section based on category
         const targetSection = this.determineSectionForCategory(taskType);
-        this.data.tasks[dateKey][targetSection].push(newTask);
+        this.data.tasks[dateKey][targetSection].unshift(newTask); // Add to beginning
         this.data.customTasks.push(newTask);
         this.saveData();
 
         // Clear form
         document.getElementById('quickAddForm').reset();
         
-        // Re-render current view
+        // Show quick tasks container and render
+        this.showQuickTasksContainer();
+        this.renderQuickTasks();
+        
+        // Re-render current view to show in sections too
         this.renderCurrentView();
         this.updateStats();
         
         // Show success message
-        this.showNotification('Task added to top of the list! 🎉', 'success');
+        this.showNotification('Task added instantly to Quick Tasks! 🚀', 'success');
+
+        // Scroll to quick tasks container
+        document.getElementById('quickTasksContainer').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+        });
+    }
+
+    // Show Quick Tasks Container
+    showQuickTasksContainer() {
+        const container = document.getElementById('quickTasksContainer');
+        if (container && this.quickTasks.length > 0) {
+            container.style.display = 'block';
+        }
+    }
+
+    // Hide Quick Tasks Container
+    hideQuickTasksContainer() {
+        const container = document.getElementById('quickTasksContainer');
+        if (container) {
+            container.style.display = 'none';
+        }
+    }
+
+    // Render Quick Tasks
+    renderQuickTasks() {
+        const container = document.getElementById('quickTasksList');
+        if (!container) return;
+
+        if (this.quickTasks.length === 0) {
+            this.hideQuickTasksContainer();
+            return;
+        }
+
+        this.showQuickTasksContainer();
+
+        container.innerHTML = this.quickTasks.map(task => `
+            <div class="quick-task-item ${task.completed ? 'completed' : ''}" data-task-id="${task.id}">
+                <div class="quick-task-checkbox ${task.completed ? 'checked' : ''}" onclick="window.planner.toggleQuickTask('${task.id}')">
+                    ${task.completed ? '<i class="fas fa-check"></i>' : ''}
+                </div>
+                <div class="quick-task-time">${task.time}</div>
+                <div class="quick-task-content">
+                    <div class="quick-task-title">
+                        <i class="fas fa-bolt new-task-indicator" title="Quick added task"></i>
+                        ${task.title}
+                    </div>
+                    ${task.description ? `<div class="quick-task-description">${task.description}</div>` : ''}
+                </div>
+                <div class="quick-task-category ${task.category}">${task.category}</div>
+                <div class="quick-task-actions">
+                    <button class="quick-task-move" onclick="window.planner.moveQuickTaskToSection('${task.id}')" title="Move to section">
+                        <i class="fas fa-arrow-down"></i> Move
+                    </button>
+                    <button class="quick-task-delete" onclick="window.planner.deleteQuickTask('${task.id}')" title="Delete task">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Toggle Quick Task
+    toggleQuickTask(taskId) {
+        const task = this.quickTasks.find(t => t.id === taskId);
+        if (task) {
+            task.completed = !task.completed;
+            
+            // Also update in daily tasks
+            const dateKey = this.getDateKey();
+            const dayTasks = this.data.tasks[dateKey];
+            if (dayTasks) {
+                for (const section in dayTasks) {
+                    const sectionTask = dayTasks[section].find(t => t.id === taskId);
+                    if (sectionTask) {
+                        sectionTask.completed = task.completed;
+                        break;
+                    }
+                }
+            }
+
+            // Update stats
+            if (task.completed) {
+                this.data.stats.totalCompleted++;
+            } else {
+                this.data.stats.totalCompleted = Math.max(0, this.data.stats.totalCompleted - 1);
+            }
+
+            this.saveData();
+            this.renderQuickTasks();
+            this.renderCurrentView();
+            this.updateStats();
+            
+            if (task.completed) {
+                this.showNotification('Quick task completed! 🎉', 'success');
+            }
+        }
+    }
+
+    // Move Quick Task to Section
+    moveQuickTaskToSection(taskId) {
+        const task = this.quickTasks.find(t => t.id === taskId);
+        if (task) {
+            // Remove from quick tasks
+            this.quickTasks = this.quickTasks.filter(t => t.id !== taskId);
+            
+            // Task is already in daily tasks, just need to remove from quick tasks
+            this.saveData();
+            this.renderQuickTasks();
+            this.renderCurrentView();
+            
+            this.showNotification('Task moved to daily section!', 'success');
+            
+            // Scroll to the appropriate section
+            const targetSection = this.determineSectionForCategory(task.category);
+            const sectionElement = document.getElementById(`${targetSection}Tasks`);
+            if (sectionElement) {
+                sectionElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+    }
+
+    // Delete Quick Task
+    deleteQuickTask(taskId) {
+        if (!confirm('Delete this quick task?')) return;
+
+        // Remove from quick tasks
+        this.quickTasks = this.quickTasks.filter(t => t.id !== taskId);
+        
+        // Remove from daily tasks
+        const dateKey = this.getDateKey();
+        const dayTasks = this.data.tasks[dateKey];
+        if (dayTasks) {
+            for (const section in dayTasks) {
+                const taskIndex = dayTasks[section].findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    dayTasks[section].splice(taskIndex, 1);
+                    break;
+                }
+            }
+        }
+        
+        // Remove from custom tasks
+        this.data.customTasks = this.data.customTasks.filter(t => t.id !== taskId);
+        
+        this.saveData();
+        this.renderQuickTasks();
+        this.renderCurrentView();
+        this.updateStats();
+        
+        this.showNotification('Quick task deleted!', 'success');
+    }
+
+    // Clear Quick Tasks
+    clearQuickTasks() {
+        if (this.quickTasks.length === 0) return;
+        
+        if (!confirm(`Clear all ${this.quickTasks.length} quick tasks? They will remain in their respective sections.`)) return;
+        
+        this.quickTasks = [];
+        this.saveData();
+        this.renderQuickTasks();
+        
+        this.showNotification('Quick tasks cleared!', 'success');
     }
 
     // Determine which section a task should go to based on category
@@ -318,25 +512,30 @@ class ModernTaskPlanner {
         const container = document.getElementById(`${sectionName}Tasks`);
         if (!container) return;
 
-        container.innerHTML = tasks.map(task => `
-            <div class="task-item ${task.completed ? 'completed' : ''} ${task.isManual ? 'manual-task' : 'default-task'}" 
-                 data-task-id="${task.id || task.title}"
-                 title="${task.isManual ? 'Manual Task - Added by you' : 'Default Task'}">
-                <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="window.planner.toggleTask('${sectionName}', '${task.id || task.title}')">
-                    ${task.completed ? '<i class="fas fa-check"></i>' : ''}
-                </div>
-                <div class="task-time">${task.time}</div>
-                <div class="task-content">
-                    <div class="task-title">
-                        ${task.isManual ? '<i class="fas fa-user-plus manual-indicator" title="Your custom task"></i> ' : ''}
-                        ${task.title}
+        container.innerHTML = tasks.map(task => {
+            const isRecent = task.createdAt && (Date.now() - new Date(task.createdAt).getTime()) < 300000; // 5 minutes
+            
+            return `
+                <div class="task-item ${task.completed ? 'completed' : ''} ${task.isManual ? 'manual-task' : 'default-task'}" 
+                     data-task-id="${task.id || task.title}"
+                     title="${task.isManual ? 'Manual Task - Added by you' : 'Default Task'}">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="window.planner.toggleTask('${sectionName}', '${task.id || task.title}')">
+                        ${task.completed ? '<i class="fas fa-check"></i>' : ''}
                     </div>
-                    ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                    <div class="task-time">${task.time}</div>
+                    <div class="task-content">
+                        <div class="task-title">
+                            ${task.isManual ? '<i class="fas fa-user-plus manual-indicator" title="Your custom task"></i> ' : ''}
+                            ${isRecent ? '<i class="fas fa-star new-task-indicator" title="Recently added"></i> ' : ''}
+                            ${task.title}
+                        </div>
+                        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                    </div>
+                    <div class="task-category ${task.category}">${task.category}</div>
+                    ${task.isManual ? '<div class="task-actions"><button class="btn-delete" onclick="window.planner.deleteTask(\'' + sectionName + '\', \'' + (task.id || task.title) + '\')" title="Delete task"><i class="fas fa-trash"></i></button></div>' : ''}
                 </div>
-                <div class="task-category ${task.category}">${task.category}</div>
-                ${task.isManual ? '<div class="task-actions"><button class="btn-delete" onclick="window.planner.deleteTask(\'' + sectionName + '\', \'' + (task.id || task.title) + '\')" title="Delete task"><i class="fas fa-trash"></i></button></div>' : ''}
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // Task Management
@@ -350,6 +549,12 @@ class ModernTaskPlanner {
         if (task) {
             task.completed = !task.completed;
             
+            // Also update in quick tasks if it exists there
+            const quickTask = this.quickTasks.find(t => t.id === taskId);
+            if (quickTask) {
+                quickTask.completed = task.completed;
+            }
+            
             // Update stats
             if (task.completed) {
                 this.data.stats.totalCompleted++;
@@ -359,6 +564,7 @@ class ModernTaskPlanner {
 
             this.saveData();
             this.renderDailyView();
+            this.renderQuickTasks();
             this.updateStats();
             
             // Show completion animation
@@ -385,6 +591,9 @@ class ModernTaskPlanner {
             if (task.isManual) {
                 dayTasks[section].splice(taskIndex, 1);
                 
+                // Remove from quick tasks if it exists there
+                this.quickTasks = this.quickTasks.filter(t => t.id !== taskId);
+                
                 // Remove from custom tasks array
                 const customTaskIndex = this.data.customTasks.findIndex(t => (t.id || t.title) === taskId);
                 if (customTaskIndex !== -1) {
@@ -393,6 +602,7 @@ class ModernTaskPlanner {
                 
                 this.saveData();
                 this.renderDailyView();
+                this.renderQuickTasks();
                 this.updateStats();
                 this.showNotification('Task deleted successfully!', 'success');
             } else {
@@ -522,7 +732,7 @@ class ModernTaskPlanner {
             
             const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) : 0;
             
-            if (completionRate >= 0.8) { // 80% completion considered successful
+            if (completionRate >= 0.8) {
                 streak++;
                 date.setDate(date.getDate() - 1);
             } else {
@@ -698,7 +908,7 @@ class ModernTaskPlanner {
 
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            if (date > new Date()) break; // Don't count future days
+            if (date > new Date()) break;
             
             const completion = this.getDayCompletionPercentage(date);
             totalCompletion += completion;
@@ -743,7 +953,6 @@ class ModernTaskPlanner {
 
     // Analytics View
     renderAnalyticsView() {
-        // This would be expanded with actual chart implementations
         console.log('Analytics view rendered - charts would go here');
     }
 
@@ -796,13 +1005,11 @@ class ModernTaskPlanner {
     }
 
     showSettings() {
-        // This would open a settings modal
         this.showNotification('Settings panel coming soon!', 'info');
     }
 
     // Notifications
     showNotification(message, type = 'info') {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.style.cssText = `
@@ -819,7 +1026,6 @@ class ModernTaskPlanner {
             animation: slideIn 0.3s ease-out;
         `;
         
-        // Set colors based on type
         if (type === 'success') {
             notification.style.borderColor = 'var(--success-color)';
             notification.style.background = 'rgba(34, 197, 94, 0.1)';
@@ -831,7 +1037,6 @@ class ModernTaskPlanner {
         notification.textContent = message;
         document.body.appendChild(notification);
         
-        // Remove after 3 seconds
         setTimeout(() => {
             notification.remove();
         }, 3000);
