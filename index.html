@@ -3,1404 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ॐ Enhanced Job Switch Planner</title>
+    <title>ॐ Modern Task Planner</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --accent-color: #10ac84;
-            --warning-color: #ff6b6b;
-            --success-color: #26de81;
-            --text-dark: #2c2c54;
-            --text-light: #5f27cd;
-            --bg-light: #f8f9ff;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --border-radius: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            min-height: 100vh;
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header Styles */
-        .header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.1rem;
-        }
-
-        .om-symbol {
-            font-size: 3rem;
-            margin-right: 15px;
-            color: #ffd700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Navigation Styles */
-        .nav-tabs {
-            display: flex;
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 5px;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-            overflow-x: auto;
-            gap: 5px;
-        }
-
-        .nav-tab {
-            flex: 1;
-            padding: 15px 20px;
-            border: none;
-            background: transparent;
-            border-radius: calc(var(--border-radius) - 5px);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            color: var(--text-light);
-            white-space: nowrap;
-        }
-
-        .nav-tab:hover {
-            background: var(--bg-light);
-            transform: translateY(-2px);
-        }
-
-        .nav-tab.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .nav-tab i {
-            margin-right: 8px;
-        }
-
-        /* View Container */
-        .view-container {
-            display: none;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .view-container.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Daily View Styles */
-        .daily-container {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 30px;
-        }
-
-        .daily-schedule {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .schedule-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .schedule-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            margin: 30px 0 20px 0;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        .section-header i {
-            margin-right: 10px;
-            font-size: 1.5rem;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--bg-light);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .task-item:hover {
-            background: var(--bg-light);
-            border-radius: 12px;
-            padding: 15px;
-            margin: 0 -15px;
-        }
-
-        .task-item.completed {
-            opacity: 0.6;
-        }
-
-        .task-checkbox {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--primary-color);
-            border-radius: 50%;
-            margin-right: 15px;
-            position: relative;
-            transition: var(--transition);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .task-checkbox.checked {
-            background: var(--success-color);
-            border-color: var(--success-color);
-        }
-
-        .task-checkbox.checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .task-time {
-            font-weight: 700;
-            color: var(--text-light);
-            min-width: 120px;
-            margin-right: 15px;
-        }
-
-        .task-activity {
-            flex: 1;
-            font-size: 1rem;
-        }
-
-        .task-activity.special {
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-
-        .task-motivation {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-top: 6px;
-            font-style: italic;
-        }
-
-        /* Right Sidebar */
-        .daily-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .progress-card, .stats-card, .reflection-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .progress-ring {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-        }
-
-        .ring-background, .ring-progress {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .ring-background {
-            background: conic-gradient(var(--bg-light) 0deg 360deg);
-        }
-
-        .ring-progress {
-            background: conic-gradient(var(--success-color) 0deg var(--progress, 0deg), transparent var(--progress, 0deg) 360deg);
-            transition: var(--transition);
-        }
-
-        .ring-progress::before {
-            content: '';
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            background: white;
-            border-radius: 50%;
-        }
-
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            z-index: 10;
-        }
-
-        .progress-text::after {
-            content: '%';
-            font-size: 1rem;
-            color: var(--text-light);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: var(--bg-light);
-            border-radius: 12px;
-        }
-
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-light);
-        }
-
-        .reflection-textarea {
-            width: 100%;
-            min-height: 100px;
-            padding: 15px;
-            border: 2px solid var(--bg-light);
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-            transition: var(--transition);
-        }
-
-        .reflection-textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Weekly View */
-        .weekly-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .day-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 20px;
-            box-shadow: var(--card-shadow);
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .day-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        .day-card.completed {
-            background: linear-gradient(135deg, var(--success-color), #20bf6b);
-            color: white;
-        }
-
-        .day-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .day-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .day-score {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        /* Monthly View */
-        .calendar-container {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 30px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .calendar-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .calendar-nav {
-            display: flex;
-            gap: 10px;
-        }
-
-        .nav-btn {
-            padding: 10px 15px;
-            border: none;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .nav-btn:hover {
-            background: var(--secondary-color);
-            transform: scale(1.05);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            margin-bottom: 30px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-light);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-        }
-
-        .calendar-day:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .calendar-day.today {
-            background: var(--warning-color);
-            color: white;
-        }
-
-        .calendar-day.completed {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .calendar-day.partial {
-            background: linear-gradient(45deg, var(--success-color) 50%, var(--bg-light) 50%);
-            color: var(--text-dark);
-        }
-
-        /* Monthly Stats */
-        .monthly-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .monthly-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 25px;
-            box-shadow: var(--card-shadow);
-            text-align: center;
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: var(--text-light);
-            font-size: 1rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .daily-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-tabs {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .task-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .task-time {
-                margin-bottom: 10px;
-                min-width: auto;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .calendar-grid {
-                gap: 1px;
-            }
-            
-            .weekly-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Additional UI enhancements */
-        .export-btn, .reset-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            margin: 10px;
-        }
-
-        .export-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .reset-btn {
-            background: var(--warning-color);
-        }
-
-        .reset-btn:hover {
-            background: #ff5252;
-            transform: translateY(-2px);
-        }
-
-        .floating-actions {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="app-container">
         <!-- Header -->
-        <div class="header">
-            <h1><span class="om-symbol">ॐ</span><i class="fas fa-rocket"></i> Job Switch Success Planner</h1>
-            <p id="currentDate">Track your spiritual journey to career success</p>
-        </div>
+        <header class="header">
+            <div class="header-content">
+                <h1><span class="om-symbol">ॐ</span><i class="fas fa-rocket"></i> Modern Task Planner</h1>
+                <p id="currentDate">Your spiritual journey to success starts today</p>
+            </div>
+        </header>
+
+        <!-- Quick Add Task Section -->
+        <section class="quick-add-section">
+            <div class="quick-add-card">
+                <h3><i class="fas fa-plus-circle"></i> Quick Add Task</h3>
+                <form id="quickAddForm">
+                    <div class="form-grid">
+                        <select id="taskType" class="form-select">
+                            <option value="">Select Task Type</option>
+                            <option value="personal">Personal</option>
+                            <option value="work">Work</option>
+                            <option value="study">Study</option>
+                            <option value="health">Health & Fitness</option>
+                            <option value="spiritual">Spiritual</option>
+                            <option value="family">Family</option>
+                        </select>
+                        <input type="text" id="taskTitle" placeholder="Task title..." class="form-input" required>
+                        <input type="time" id="taskTime" class="form-input">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                    <textarea id="taskDescription" placeholder="Task description (optional)..." class="form-textarea"></textarea>
+                </form>
+            </div>
+        </section>
 
         <!-- Navigation Tabs -->
-        <div class="nav-tabs">
-            <button class="nav-tab active" data-view="daily"><i class="fas fa-calendar-day"></i> Daily</button>
-            <button class="nav-tab" data-view="weekly"><i class="fas fa-calendar-week"></i> Weekly</button>
-            <button class="nav-tab" data-view="monthly"><i class="fas fa-calendar"></i> Monthly</button>
-            <button class="nav-tab" data-view="study"><i class="fas fa-book-reader"></i> Study</button>
-            <button class="nav-tab" data-view="analytics"><i class="fas fa-chart-line"></i> Analytics</button>
-        </div>
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-view="daily">
+                <i class="fas fa-calendar-day"></i>
+                <span>Daily</span>
+            </button>
+            <button class="nav-tab" data-view="weekly">
+                <i class="fas fa-calendar-week"></i>
+                <span>Weekly</span>
+            </button>
+            <button class="nav-tab" data-view="monthly">
+                <i class="fas fa-calendar"></i>
+                <span>Monthly</span>
+            </button>
+            <button class="nav-tab" data-view="analytics">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </button>
+        </nav>
 
         <!-- Daily View -->
-        <div class="view-container active" id="dailyView">
+        <main class="view-container active" id="dailyView">
             <div class="daily-container">
-                <!-- Main Schedule -->
                 <div class="daily-schedule">
                     <div class="schedule-header">
-                        <div class="schedule-title" id="dailyTitle">Today's Schedule</div>
+                        <h2 class="schedule-title" id="dailyTitle">Today's Schedule</h2>
+                        <div class="schedule-actions">
+                            <button class="btn btn-outline" id="refreshTasks">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Morning Section -->
-                    <div class="section-header">
-                        <i class="fas fa-sun"></i> Morning Routine
+                    <!-- Essential Daily Tasks -->
+                    <div class="task-section">
+                        <div class="section-header">
+                            <i class="fas fa-star section-icon"></i>
+                            <h3>Essential Daily Tasks</h3>
+                            <span class="section-badge" id="essentialBadge">0/0</span>
+                        </div>
+                        <div id="essentialTasks" class="task-list"></div>
                     </div>
-                    <div id="morningTasks"></div>
 
-                    <!-- Work Section -->
-                    <div class="section-header">
-                        <i class="fas fa-briefcase"></i> Office Work
+                    <!-- Morning Routine -->
+                    <div class="task-section">
+                        <div class="section-header">
+                            <i class="fas fa-sun section-icon"></i>
+                            <h3>Morning Routine</h3>
+                            <span class="section-badge" id="morningBadge">0/0</span>
+                        </div>
+                        <div id="morningTasks" class="task-list"></div>
                     </div>
-                    <div id="workTasks"></div>
 
-                    <!-- Evening Section -->
-                    <div class="section-header">
-                        <i class="fas fa-moon"></i> Evening Focus
+                    <!-- Work Tasks -->
+                    <div class="task-section">
+                        <div class="section-header">
+                            <i class="fas fa-briefcase section-icon"></i>
+                            <h3>Work & Professional</h3>
+                            <span class="section-badge" id="workBadge">0/0</span>
+                        </div>
+                        <div id="workTasks" class="task-list"></div>
                     </div>
-                    <div id="eveningTasks"></div>
+
+                    <!-- Evening Focus -->
+                    <div class="task-section">
+                        <div class="section-header">
+                            <i class="fas fa-moon section-icon"></i>
+                            <h3>Evening Focus</h3>
+                            <span class="section-badge" id="eveningBadge">0/0</span>
+                        </div>
+                        <div id="eveningTasks" class="task-list"></div>
+                    </div>
+
+                    <!-- Custom Tasks -->
+                    <div class="task-section">
+                        <div class="section-header">
+                            <i class="fas fa-user-plus section-icon"></i>
+                            <h3>My Custom Tasks</h3>
+                            <span class="section-badge" id="customBadge">0/0</span>
+                        </div>
+                        <div id="customTasks" class="task-list"></div>
+                    </div>
                 </div>
 
                 <!-- Sidebar -->
-                <div class="daily-sidebar">
+                <aside class="daily-sidebar">
                     <!-- Progress Card -->
                     <div class="progress-card">
-                        <h3 style="text-align: center; margin-bottom: 20px; color: var(--text-dark);">
-                            <i class="fas fa-target"></i> Today's Progress
-                        </h3>
+                        <h3><i class="fas fa-target"></i> Today's Progress</h3>
                         <div class="progress-ring">
-                            <div class="ring-background"></div>
-                            <div class="ring-progress" id="dailyProgressRing"></div>
-                            <div class="progress-text" id="dailyProgressText">0</div>
+                            <svg class="progress-svg" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="54" class="progress-background"></circle>
+                                <circle cx="60" cy="60" r="54" class="progress-bar" id="progressCircle"></circle>
+                            </svg>
+                            <div class="progress-text" id="progressText">0%</div>
+                        </div>
+                        <div class="progress-details">
+                            <span id="completedTasks">0</span> of <span id="totalTasks">0</span> tasks completed
                         </div>
                     </div>
 
                     <!-- Quick Stats -->
                     <div class="stats-card">
-                        <h3 style="margin-bottom: 20px; color: var(--text-dark);">
-                            <i class="fas fa-chart-pie"></i> Quick Stats
-                        </h3>
+                        <h3><i class="fas fa-chart-pie"></i> Quick Stats</h3>
                         <div class="stats-grid">
                             <div class="stat-item">
-                                <div class="stat-number" id="todayTasks">0/0</div>
+                                <div class="stat-number" id="todayStreak">0</div>
                                 <div class="stat-label">Today</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-number" id="currentStreak">0</div>
-                                <div class="stat-label">Streak</div>
+                                <div class="stat-number" id="weekStreak">0</div>
+                                <div class="stat-label">This Week</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-number" id="weekProgress">0%</div>
-                                <div class="stat-label">Week</div>
+                                <div class="stat-number" id="monthStreak">0</div>
+                                <div class="stat-label">This Month</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-number" id="monthProgress">0%</div>
-                                <div class="stat-label">Month</div>
+                                <div class="stat-number" id="totalStreak">0</div>
+                                <div class="stat-label">Total</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Daily Reflection -->
                     <div class="reflection-card">
-                        <h3 style="margin-bottom: 15px; color: var(--text-dark);">
-                            <i class="fas fa-pen-fancy"></i> Daily Reflection
-                        </h3>
-                        <textarea 
-                            id="dailyReflection" 
-                            class="reflection-textarea" 
-                            placeholder="How did today go? What did you learn? What will you improve tomorrow?">
-                        </textarea>
+                        <h3><i class="fas fa-pen-fancy"></i> Daily Reflection</h3>
+                        <textarea id="dailyReflection" placeholder="How did today go? What did you learn?"></textarea>
+                        <button class="btn btn-primary btn-sm" id="saveReflection">Save Reflection</button>
                     </div>
-                </div>
+                </aside>
             </div>
-        </div>
+        </main>
 
         <!-- Weekly View -->
         <div class="view-container" id="weeklyView">
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <div class="calendar-title">This Week's Overview</div>
-                </div>
-                <div class="weekly-grid" id="weeklyGrid">
-                    <!-- Weekly content will be generated by JavaScript -->
+            <div class="weekly-header">
+                <h2>Weekly Overview</h2>
+                <div class="week-navigation">
+                    <button class="btn btn-outline" id="prevWeek">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span id="weekRange">Current Week</span>
+                    <button class="btn btn-outline" id="nextWeek">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
+            <div class="weekly-grid" id="weeklyGrid"></div>
         </div>
 
         <!-- Monthly View -->
         <div class="view-container" id="monthlyView">
             <div class="calendar-container">
                 <div class="calendar-header">
-                    <div class="calendar-title" id="monthTitle">Monthly Overview</div>
+                    <h2 id="monthTitle">Monthly Overview</h2>
                     <div class="calendar-nav">
-                        <button class="nav-btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-                        <button class="nav-btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                        <button class="btn btn-outline" id="prevMonth">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-outline" id="nextMonth">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
-                <div class="calendar-grid" id="calendarGrid">
-                    <!-- Calendar will be generated by JavaScript -->
-                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
             </div>
-            
-            <!-- Monthly Stats -->
-            <div class="monthly-stats">
-                <div class="monthly-card">
-                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                    <div class="stat-number" id="monthlyCompleted">0</div>
-                    <div class="stat-label">Perfect Days</div>
-                </div>
-                <div class="monthly-card">
-                    <div class="stat-icon"><i class="fas fa-percentage"></i></div>
-                    <div class="stat-number" id="monthlyAverage">0</div>
-                    <div class="stat-label">Average Completion</div>
-                </div>
-                <div class="monthly-card">
-                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
-                    <div class="stat-number" id="bestStreak">0</div>
-                    <div class="stat-label">Best Streak</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Study View -->
-        <div class="view-container" id="studyView">
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <div class="calendar-title" id="studyTitle">Study Plan</div>
-                </div>
-                <div id="studyUpcoming" style="margin-bottom:20px;"></div>
-                <div class="monthly-stats">
-                    <div class="monthly-card">
-                        <div class="stat-icon"><i class="fas fa-tasks"></i></div>
-                        <div class="stat-number" id="studyTotal">0</div>
-                        <div class="stat-label">Study Tasks Planned</div>
-                    </div>
-                    <div class="monthly-card">
-                        <div class="stat-icon"><i class="fas fa-check-double"></i></div>
-                        <div class="stat-number" id="studyDone">0</div>
-                        <div class="stat-label">Study Tasks Completed</div>
-                    </div>
-                    <div class="monthly-card">
-                        <div class="stat-icon"><i class="fas fa-percentage"></i></div>
-                        <div class="stat-number" id="studyPercent">0</div>
-                        <div class="stat-label">Study Completion</div>
-                    </div>
-                </div>
-                <div class="monthly-card" style="text-align:left">
-                    <h3><i class="fas fa-list-ul"></i> Topic-wise Tracker</h3>
-                    <div id="topicTracker"></div>
-                </div>
-            </div>
+            <div class="monthly-stats" id="monthlyStats"></div>
         </div>
 
         <!-- Analytics View -->
         <div class="view-container" id="analyticsView">
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <div class="calendar-title">Analytics & Insights</div>
-                </div>
-                <div style="text-align: center; padding: 50px; color: var(--text-light);">
-                    <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                    <h3>Advanced Analytics Coming Soon</h3>
-                    <p>Detailed insights and progress analytics will be available here.</p>
+            <div class="analytics-container">
+                <h2>Analytics & Insights</h2>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3><i class="fas fa-chart-line"></i> Performance Trends</h3>
+                        <div class="chart-placeholder">
+                            <p>Track your daily completion rates over time</p>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3><i class="fas fa-pie-chart"></i> Task Categories</h3>
+                        <div class="chart-placeholder">
+                            <p>See which types of tasks you complete most</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Floating Actions -->
-        <div class="floating-actions">
-            <button class="export-btn" onclick="exportData()"><i class="fas fa-download"></i> Export</button>
-            <button class="reset-btn" onclick="resetAllProgress()"><i class="fas fa-refresh"></i> Reset</button>
+        <!-- Floating Action Button -->
+        <div class="fab-container">
+            <button class="fab" id="fabMain">
+                <i class="fas fa-plus"></i>
+            </button>
+            <div class="fab-actions" id="fabActions">
+                <button class="fab-action" data-action="export">
+                    <i class="fas fa-download"></i>
+                    <span>Export</span>
+                </button>
+                <button class="fab-action" data-action="reset">
+                    <i class="fas fa-refresh"></i>
+                    <span>Reset</span>
+                </button>
+                <button class="fab-action" data-action="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </button>
+            </div>
         </div>
     </div>
 
-    <script>
-class EnhancedPlanner {
-    constructor() {
-        this.currentDate = new Date();
-        this.currentView = 'daily';
-        this.currentMonth = new Date();
-        this.startDate = this.normalizeDate(new Date()); 
-        this.officeDays = [1, 2, 3, 4, 5, 6]; // Mon-Sat
-        this.data = this.loadData();
-        this.motivationPool = [
-            "You should do this task - success requires action.",
-            "Look at mother and father and move forward - make them proud.",
-            "EMIs won't pay themselves - stay disciplined and focused.",
-            "Repay the relative's loan - honor your commitments.",
-            "Do it for mother and father - their sacrifice deserves your success."
-        ];
-        
-        this.getMotivation = (index = 0) => {
-            const dayIndex = this.currentDate.getDay();
-            return this.motivationPool[(dayIndex + index) % this.motivationPool.length];
-        };
-
-        this.studyThemeByWeek = [
-            { name: "React Fundamentals", code: "react-core" },
-            { name: "React Advanced", code: "react-adv" },
-            { name: "Node.js Basics", code: "node-core" },
-            { name: "React Native Core", code: "rn-core" },
-            { name: "Node Auth & DB", code: "node-auth-db" },
-            { name: "Full-Stack Integration", code: "fullstack" },
-            { name: "Deployment & DevOps", code: "deploy" },
-            { name: "Interview Prep", code: "interview" }
-        ];
-
-        this.studySubtasks = {
-            "react-core":   ["Learn hooks without AI", "Build form component", "Fix existing bugs", "Practice 10 Q&A"],
-            "react-adv":    ["Master Context/Redux", "Performance optimization", "Code review session", "Advanced concepts quiz"],
-            "node-core":    ["Express routes practice", "REST API patterns", "Error handling implementation", "Backend fundamentals quiz"],
-            "rn-core":      ["Navigation implementation", "Lists & forms building", "UI/UX polish", "Mobile development quiz"],
-            "node-auth-db": ["JWT authentication", "MongoDB operations", "Data validation", "Security practices quiz"],
-            "fullstack":    ["API integration", "Frontend-backend sync", "Handle edge cases", "Full-stack project quiz"],
-            "deploy":       ["Environment setup", "Build & deployment", "CI/CD basics", "DevOps fundamentals quiz"],
-            "interview":    ["Project explanations", "DSA problem solving", "System design practice", "HR interview prep"]
-        };
-
-        if (!this.data.studyProgress) this.data.studyProgress = {};
-        this.schedule = this.getSchedule(this.currentDate);
-        this.init();
-    }
-
-    loadData() {
-        const saved = localStorage.getItem('job-switch-enhanced-data');
-        return saved ? JSON.parse(saved) : {};
-    }
-    
-    saveData() {
-        localStorage.setItem('job-switch-enhanced-data', JSON.stringify(this.data));
-    }
-
-    normalizeDate(d) {
-        const x = new Date(d);
-        x.setHours(0, 0, 0, 0);
-        return x;
-    }
-    
-    getDateKey(date = this.currentDate) {
-        return this.normalizeDate(date).toISOString().split('T')[0];
-    }
-
-    getThemeForDate(date) {
-    try {
-        const offset = Math.floor((this.normalizeDate(date) - this.normalizeDate(this.startDate)) / (1000 * 60 * 60 * 24));
-        const weekIndex = Math.max(0, Math.floor(offset / 7)) % this.studyThemeByWeek.length;
-        const theme = this.studyThemeByWeek[weekIndex];
-        
-        // Fallback if theme is still undefined
-        return theme || { name: "React Fundamentals", code: "react-core" };
-    } catch (error) {
-        console.error('Error in getThemeForDate:', error);
-        // Return default theme on error
-        return { name: "React Fundamentals", code: "react-core" };
-    }
-}
-
-
-    getStudyBlock(date) {
-        const theme = this.getThemeForDate(date);
-        const dateKey = this.getDateKey(date);
-        const topicId = `${theme.code}-${dateKey}`;
-        const title = `${theme.name} — ${dateKey}`;
-        const subtasks = this.studySubtasks[theme.code] || ["Study", "Practice", "Review", "Quiz"];
-        
-        if (!this.data.studyProgress[topicId]) {
-            this.data.studyProgress[topicId] = { title, doneDates: {}, doneCount: 0, total: subtasks.length };
-            this.saveData();
-        }
-        return { topicId, title, subtasks, theme };
-    }
-
-    completeStudySubtask(topicId) {
-        const dateKey = this.getDateKey(this.currentDate);
-        const node = this.data.studyProgress[topicId];
-        if (!node.doneDates[dateKey]) {
-            node.doneDates[dateKey] = true;
-            node.doneCount = Math.min((node.doneCount || 0) + 1, node.total || 4);
-            this.saveData();
-        }
-    }
-
-    getSchedule(date) {
-        const day = this.normalizeDate(date).getDay();
-        const isWorkDay = this.officeDays.includes(day);
-        const studyBlock = this.getStudyBlock(date);
-        
-        const eveningStudyTasks = [
-            { time: "7:00-7:30 PM", activity: `${studyBlock.subtasks[0]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: this.getMotivation(2) },
-            { time: "7:30-8:00 PM", activity: `${studyBlock.subtasks[1]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: this.getMotivation(3) },
-            { time: "8:00-8:30 PM", activity: `${studyBlock.subtasks[2]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: this.getMotivation(4) }
-        ];
-
-        const schedule = [
-            // Morning
-            { time: "5:30-6:00 AM", activity: "Wake up + Morning routine", section: "morning", motivation: this.getMotivation(0) },
-            { time: "6:00-6:30 AM", activity: "Study: Core concepts (React/Node)", section: "morning", motivation: "Build your future - every morning counts." },
-            { time: "6:30-7:00 AM", activity: "Practice: Code without AI", section: "morning", motivation: "Independence leads to confidence." },
-            { time: "7:00-7:30 AM", activity: "English communication practice", section: "morning", motivation: "Clear communication opens doors." },
-            { time: "7:30-8:00 AM", activity: "Breakfast + Get ready", section: "morning", motivation: "Fuel your body for success." },
-
-            // Work (Mon-Sat only)
-            ...(isWorkDay ? [
-                { time: "9:00-1:00 PM", activity: "Office work — Morning focus block", section: "work", motivation: this.getMotivation(1) },
-                { time: "1:00-1:30 PM", activity: "Lunch break", section: "work", motivation: "Recharge for afternoon productivity." },
-                { time: "1:30-6:00 PM", activity: "Office work — Afternoon deliverables", section: "work", motivation: "Excellence at current job builds reputation." }
-            ] : []),
-
-            // Evening
-            { time: "6:30-7:00 PM", activity: "Dinner + Relaxation", section: "evening", motivation: this.getMotivation(1) },
-            ...eveningStudyTasks,
-            { time: "8:30-9:00 PM", activity: "English: Record project explanation", section: "evening", motivation: "Practice makes perfect interviews." },
-            { time: "9:00-10:00 PM", activity: "Job applications or interview prep", section: "evening", motivation: "Every application is a step closer." },
-            { time: "10:00-10:30 PM", activity: "Plan tomorrow + Reflection", section: "evening", motivation: this.getMotivation(3) },
-            { time: "10:30 PM", activity: "Sleep — No screens", section: "evening", motivation: "Rest for tomorrow's achievements." }
-        ];
-
-        if (day === 0) {
-            schedule.splice(5, 0, 
-                { time: "11:00 AM-12:00 PM", activity: `Weekend Project: ${studyBlock.title}`, section: "morning", special: true, studyTopicId: studyBlock.topicId, motivation: "Sunday effort pays Monday dividends." },
-                { time: "2:00-3:00 PM", activity: `${studyBlock.subtasks[3]} — ${studyBlock.title}`, section: "evening", special: true, studyTopicId: studyBlock.topicId, motivation: "Weekend focus = weekday confidence." }
-            );
-        }
-
-        return schedule;
-    }
-
-    getDayData(targetDate = this.currentDate) {
-        const key = this.getDateKey(targetDate);
-        if (!this.data[key]) {
-            this.data[key] = { tasks: new Array(this.schedule.length).fill(false), reflection: "", date: key };
-            this.saveData();
-            return this.data[key];
-        }
-        
-        const d = this.data[key];
-        if (!Array.isArray(d.tasks)) d.tasks = [];
-        if (d.tasks.length !== this.schedule.length) {
-            const newArr = new Array(this.schedule.length).fill(false);
-            for (let i = 0; i < Math.min(d.tasks.length, newArr.length); i++) newArr[i] = !!d.tasks[i];
-            d.tasks = newArr;
-            this.saveData();
-        }
-        return d;
-    }
-
-    init() {
-        this.updateCurrentDate();
-        this.setupEventListeners();
-        this.renderCurrentView();
-        this.updateStats();
-    }
-
-    updateCurrentDate() {
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const el = document.getElementById('currentDate');
-        if (el) el.textContent = this.currentDate.toLocaleDateString('en-US', options);
-    }
-
-    setupEventListeners() {
-        document.querySelectorAll('.nav-tab').forEach(tab => {
-            tab.addEventListener('click', () => this.switchView(tab.dataset.view));
-        });
-        
-        const prev = document.getElementById('prevMonth');
-        const next = document.getElementById('nextMonth');
-        if (prev) prev.addEventListener('click', () => { this.currentMonth.setMonth(this.currentMonth.getMonth() - 1); this.renderMonthlyView(); });
-        if (next) next.addEventListener('click', () => { this.currentMonth.setMonth(this.currentMonth.getMonth() + 1); this.renderMonthlyView(); });
-        
-        const refl = document.getElementById('dailyReflection');
-        if (refl) refl.addEventListener('input', (e) => { const dayData = this.getDayData(); dayData.reflection = e.target.value; this.saveData(); });
-    }
-
-    switchView(viewName) {
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        const btn = document.querySelector(`[data-view="${viewName}"]`);
-        if (btn) btn.classList.add('active');
-
-        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
-        const view = document.getElementById(`${viewName}View`);
-        if (view) view.classList.add('active');
-
-        this.currentView = viewName;
-        this.renderCurrentView();
-    }
-
-    renderCurrentView() {
-        switch (this.currentView) {
-            case 'daily': this.renderDailyView(); break;
-            case 'weekly': this.renderWeeklyView(); break;
-            case 'monthly': this.renderMonthlyView(); break;
-            case 'analytics': this.renderAnalyticsView(); break;
-            case 'study': this.renderStudyView(); break;
-        }
-    }
-
-    renderDailyView() {
-        this.schedule = this.getSchedule(this.currentDate);
-        const dayData = this.getDayData();
-
-        const options = { weekday: 'long', month: 'long', day: 'numeric' };
-        const title = document.getElementById('dailyTitle');
-        if (title) title.textContent = this.currentDate.toLocaleDateString('en-US', options);
-
-        this.renderTaskSection('morning', 'morningTasks');
-        this.renderTaskSection('work', 'workTasks');
-        this.renderTaskSection('evening', 'eveningTasks');
-
-        const refl = document.getElementById('dailyReflection');
-        if (refl) refl.value = dayData.reflection || "";
-
-        this.updateDailyProgress();
-    }
-
-    renderTaskSection(sectionName, containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    const tasks = this.schedule.filter(t => t.section === sectionName);
-    const dayData = this.getDayData();
-
-    container.innerHTML = tasks.map(task => {
-        const globalIndex = this.schedule.findIndex(scheduleTask => 
-            scheduleTask.time === task.time && 
-            scheduleTask.activity === task.activity && 
-            scheduleTask.section === task.section
-        );
-        
-        const isCompleted = globalIndex >= 0 ? !!dayData.tasks[globalIndex] : false;
-        
-        return `
-            <div class="task-item ${isCompleted ? 'completed' : ''}">
-                <div class="task-checkbox ${isCompleted ? 'checked' : ''}" 
-                     data-task-index="${globalIndex}"
-                     style="cursor: pointer;">
-                </div>
-                <div class="task-time">${task.time}</div>
-                <div class="task-activity ${task.special ? 'special' : ''}">
-                    ${task.activity}
-                    <div class="task-motivation">${task.motivation || ''}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    // Add click event listeners after rendering
-    container.querySelectorAll('.task-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const taskIndex = parseInt(checkbox.getAttribute('data-task-index'));
-            if (taskIndex >= 0) {
-                this.toggleTask(taskIndex);
-            }
-        });
-    });
-}
-
-
-    toggleTask(taskIndex) {
-        const dayData = this.getDayData();
-        dayData.tasks[taskIndex] = !dayData.tasks[taskIndex];
-
-        const task = this.schedule[taskIndex];
-        if (task && task.studyTopicId && dayData.tasks[taskIndex]) {
-            this.completeStudySubtask(task.studyTopicId);
-        }
-
-        this.saveData();
-        this.renderDailyView();
-        this.updateStats();
-    }
-
-    updateDailyProgress() {
-        const dayData = this.getDayData();
-        const completedTasks = dayData.tasks.filter(Boolean).length;
-        const totalTasks = this.schedule.length;
-        const percentage = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
-        
-        const txt = document.getElementById('dailyProgressText');
-        const ring = document.getElementById('dailyProgressRing');
-        if (txt) txt.textContent = percentage.toString();
-        if (ring) ring.style.setProperty('--progress', `${percentage * 3.6}deg`);
-    }
-
-    renderWeeklyView() {
-        const container = document.getElementById('weeklyGrid');
-        if (!container) return;
-        
-        const startOfWeek = new Date(this.currentDate);
-        startOfWeek.setDate(this.currentDate.getDate() - this.currentDate.getDay());
-
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        let weeklyHtml = '';
-        
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(startOfWeek);
-            d.setDate(startOfWeek.getDate() + i);
-            this.schedule = this.getSchedule(d);
-            const dd = this.getDayData(d);
-            
-            if (dd.tasks.length !== this.schedule.length) {
-                const newArr = new Array(this.schedule.length).fill(false);
-                for (let k = 0; k < Math.min(dd.tasks.length, newArr.length); k++) newArr[k] = !!dd.tasks[k];
-                dd.tasks = newArr;
-                this.saveData();
-            }
-            
-            const completedTasks = dd.tasks.filter(Boolean).length;
-            const percent = this.schedule.length ? Math.round((completedTasks / this.schedule.length) * 100) : 0;
-
-            weeklyHtml += `
-                <div class="day-card ${percent === 100 ? 'completed' : ''}">
-                    <div class="day-card-header">
-                        <div class="day-name">${dayNames[d.getDay()]}</div>
-                        <div class="day-score">${completedTasks}/${this.schedule.length} (${percent}%)</div>
-                    </div>
-                    <div class="day-progress-bar" style="background: linear-gradient(90deg, var(--accent-color) ${percent}%, var(--bg-light) ${percent}%); height:8px; border-radius:4px; margin:10px 0;"></div>
-                    <p style="color: var(--text-light); font-size: 0.9rem;">${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                </div>
-            `;
-        }
-        container.innerHTML = weeklyHtml;
-    }
-
-    renderMonthlyView() {
-        const monthTitle = this.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        const title = document.getElementById('monthTitle');
-        if (title) title.textContent = monthTitle;
-        this.renderCalendarGrid();
-        this.updateMonthlyStats();
-    }
-
-    renderCalendarGrid() {
-        const container = document.getElementById('calendarGrid');
-        if (!container) return;
-        
-        const year = this.currentMonth.getFullYear();
-        const month = this.currentMonth.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        const startingDay = firstDay.getDay();
-
-        let html = '';
-        const headers = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        headers.forEach(h => html += `<div class="calendar-day" style="font-weight:700; background: var(--bg-light); cursor: default;">${h}</div>`);
-        
-        for (let i = 0; i < startingDay; i++) html += `<div class="calendar-day" style="cursor: default;"></div>`;
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const d = new Date(year, month, day);
-            this.schedule = this.getSchedule(d);
-            const dd = this.getDayData(d);
-            
-            if (dd.tasks.length !== this.schedule.length) {
-                const newArr = new Array(this.schedule.length).fill(false);
-                for (let k = 0; k < Math.min(dd.tasks.length, newArr.length); k++) newArr[k] = !!dd.tasks[k];
-                dd.tasks = newArr;
-                this.saveData();
-            }
-            
-            const completed = dd.tasks.filter(Boolean).length;
-            let dayClass = 'calendar-day';
-            if (this.isSameDay(d, this.currentDate)) dayClass += ' today';
-            else if (completed === this.schedule.length && this.schedule.length > 0) dayClass += ' completed';
-            else if (completed > 0) dayClass += ' partial';
-            
-           html += `<div class="${dayClass}" data-date="${d.toISOString().split('T')[0]}" style="cursor: pointer;">${day}</div>`;}
-        container.innerHTML = html;
-        container.querySelectorAll('.calendar-day[data-date]').forEach(dayEl => {
-    dayEl.addEventListener('click', () => {
-        const dateStr = dayEl.getAttribute('data-date');
-        if (dateStr && window.appInstance) {
-            window.appInstance.selectDate(dateStr);
-        }
-    });
-});
-    }
-
-    selectDate(dateString) {
-    try {
-        this.currentDate = new Date(dateString);
-        this.schedule = this.getSchedule(this.currentDate);
-        this.switchView('daily');
-        this.updateCurrentDate();
-    } catch (error) {
-        console.error('Error selecting date:', error);
-    }
-}
-
-
-    isSameDay(a, b) {
-        return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
-    }
-
-    updateMonthlyStats() {
-        const y = this.currentMonth.getFullYear();
-        const m = this.currentMonth.getMonth();
-        const dim = new Date(y, m + 1, 0).getDate();
-        let completedDays = 0, totalTasks = 0, completedTasks = 0;
-        let streaks = [], currentStreak = 0;
-
-        for (let d = 1; d <= dim; d++) {
-            const date = new Date(y, m, d);
-            this.schedule = this.getSchedule(date);
-            const dd = this.getDayData(date);
-            const dayDone = dd.tasks.filter(Boolean).length;
-            totalTasks += this.schedule.length;
-            completedTasks += dayDone;
-            
-            if (this.schedule.length > 0 && dayDone === this.schedule.length) {
-                completedDays++;
-                currentStreak += 1;
-            } else {
-                if (currentStreak > 0) streaks.push(currentStreak);
-                currentStreak = 0;
-            }
-        }
-        if (currentStreak > 0) streaks.push(currentStreak);
-        
-        const average = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
-        const best = streaks.length ? Math.max(...streaks) : 0;
-        
-        const c = id => document.getElementById(id);
-        if (c('monthlyCompleted')) c('monthlyCompleted').textContent = completedDays.toString();
-        if (c('monthlyAverage')) c('monthlyAverage').textContent = average.toString();
-        if (c('bestStreak')) c('bestStreak').textContent = best.toString();
-    }
-
-    renderAnalyticsView() {
-        // Placeholder
-    }
-
-    renderStudyView() {
-        const title = document.getElementById('studyTitle');
-        if (title) title.textContent = `Study Plan — ${this.getThemeForDate(this.currentDate).name}`;
-        
-        const upcoming = document.getElementById('studyUpcoming');
-        const topicTracker = document.getElementById('topicTracker');
-
-        let list = '<div style="display:grid; gap:10px">';
-        let total = 0, done = 0;
-        
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(this.currentDate);
-            d.setDate(this.currentDate.getDate() + i);
-            const { topicId, title } = this.getStudyBlock(d);
-            const node = this.data.studyProgress[topicId] || { doneCount: 0, total: 4 };
-            total += node.total || 4;
-            done += node.doneCount || 0;
-            
-            list += `
-                <div class="task-item" style="border:2px solid var(--bg-light)">
-                    <div class="task-activity">
-                        <strong>${title}</strong>
-                        <div class="task-motivation">Stay consistent—parents are watching this journey.</div>
-                    </div>
-                    <div class="task-time">${node.doneCount || 0}/${node.total || 4} done</div>
-                </div>
-            `;
-        }
-        list += '</div>';
-        if (upcoming) upcoming.innerHTML = list;
-
-        const percent = total ? Math.round((done / total) * 100) : 0;
-        const st = id => document.getElementById(id);
-        if (st('studyTotal')) st('studyTotal').textContent = total.toString();
-        if (st('studyDone')) st('studyDone').textContent = done.toString();
-        if (st('studyPercent')) st('studyPercent').textContent = percent.toString();
-
-        let topicsHtml = '<div style="display:grid; gap:10px">';
-        Object.keys(this.data.studyProgress).slice(-30).forEach(id => {
-            const node = this.data.studyProgress[id];
-            const p = node.total ? Math.round((node.doneCount / node.total) * 100) : 0;
-            topicsHtml += `
-                <div class="task-item" style="border:2px solid var(--bg-light)">
-                    <div class="task-activity">
-                        <strong>${node.title}</strong>
-                        <div class="task-motivation">EMIs and responsibilities demand daily progress.</div>
-                    </div>
-                    <div class="task-time">${node.doneCount}/${node.total} (${p}%)</div>
-                </div>
-            `;
-        });
-        topicsHtml += '</div>';
-        if (topicTracker) topicTracker.innerHTML = topicsHtml;
-    }
-
-    updateStats() {
-        const dd = this.getDayData();
-        const todayCompleted = dd.tasks.filter(Boolean).length;
-        const elToday = document.getElementById('todayTasks');
-        if (elToday) elToday.textContent = `${todayCompleted}/${this.schedule.length}`;
-
-        const streak = this.calculateCurrentStreak();
-        const elStreak = document.getElementById('currentStreak');
-        if (elStreak) elStreak.textContent = streak.toString();
-
-        const weekProgress = this.calculateWeekProgress();
-        const monthProgress = this.calculateMonthProgress();
-        const elWeek = document.getElementById('weekProgress');
-        const elMonth = document.getElementById('monthProgress');
-        if (elWeek) elWeek.textContent = `${weekProgress}%`;
-        if (elMonth) elMonth.textContent = `${monthProgress}%`;
-    }
-
-    calculateCurrentStreak() {
-        let streak = 0;
-        let date = new Date(this.currentDate);
-        
-        while (true) {
-            this.schedule = this.getSchedule(date);
-            const dd = this.getDayData(date);
-            const completed = dd.tasks.filter(Boolean).length;
-            
-            if (this.schedule.length > 0 && completed === this.schedule.length) {
-                streak += 1;
-                date.setDate(date.getDate() - 1);
-            } else break;
-        }
-        return streak;
-    }
-
-    calculateWeekProgress() {
-        const start = new Date(this.currentDate);
-        start.setDate(this.currentDate.getDate() - this.currentDate.getDay());
-        let total = 0, done = 0;
-        
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(start);
-            d.setDate(start.getDate() + i);
-            this.schedule = this.getSchedule(d);
-            const dd = this.getDayData(d);
-            total += this.schedule.length;
-            done += dd.tasks.filter(Boolean).length;
-        }
-        return total ? Math.round((done / total) * 100) : 0;
-    }
-
-    calculateMonthProgress() {
-        const y = this.currentDate.getFullYear();
-        const m = this.currentDate.getMonth();
-        const dim = new Date(y, m + 1, 0).getDate();
-        let total = 0, done = 0;
-        
-        for (let d = 1; d <= dim; d++) {
-            const date = new Date(y, m, d);
-            this.schedule = this.getSchedule(date);
-            const dd = this.getDayData(date);
-            total += this.schedule.length;
-            done += dd.tasks.filter(Boolean).length;
-        }
-        return total ? Math.round((done / total) * 100) : 0;
-    }
-}
-
-// Global functions - Fixed to work properly
-let app;
-
-window.toggleTask = function(taskIndex) {
-    if (window.app && typeof window.app.toggleTask === 'function') {
-        window.app.toggleTask(taskIndex);
-        return false; // Prevent event bubbling
-    }
-};
-
-window.selectDate = function(dateString) {
-    if (app) {
-        app.selectDate(dateString);
-    }
-};
-
-// Remove old global functions and replace with this:
-function exportData() {
-    if (!window.appInstance) return;
-    const data = window.appInstance.data;
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    const stamp = new Date().toISOString().split('T')[0];
-    link.download = `job-switch-planner-${stamp}.json`;
-    link.click();
-}
-
-function resetAllProgress() {
-    if (confirm('Are you sure you want to reset all progress? This action cannot be undone.')) {
-        localStorage.removeItem('job-switch-enhanced-data');
-        location.reload();
-    }
-}
-
-// Initialize with proper error handling
-document.addEventListener('DOMContentLoaded', () => {
-    try {
-        window.appInstance = new EnhancedPlanner();
-        console.log('App initialized successfully');
-    } catch (error) {
-        console.error('Failed to initialize app:', error);
-        alert('Failed to load planner. Please refresh the page.');
-    }
-});
-
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
